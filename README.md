@@ -1,4 +1,4 @@
-# ts-gen
+# ts-treegen
 
 Tiny, low-level engine for programmatic file generation.
 
