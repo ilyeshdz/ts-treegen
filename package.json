@@ -1,0 +1,41 @@
+{
+  "name": "ts-gen",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Tiny, low-level engine for programmatic file generation.",
+  "packageManager": "pnpm@11.8.0+sha512.c1f5e7c4cb241c8f174b743851d82f42b802324afc8b0f116b96adb15aa06664948dde36960a3ba1079ba5b4b29dd0140135b94b5b5f5263592249d68e555f26",
+  "author": "Ilyes Hernandez <hdz.ilyes@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/ilyeshdz/ts-gen#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ilyeshdz/ts-gen.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ilyeshdz/ts-gen/issues"
+  },
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build",
+    "release": "release-it"
+  },
+  "devDependencies": {
+    "@release-it/conventional-changelog": "^11.0.1",
+    "@types/node": "^25.6.2",
+    "@typescript/native-preview": "7.0.0-dev.20260509.2",
+    "release-it": "^20.2.0",
+    "tsdown": "^0.22.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  }
+}
