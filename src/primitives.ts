@@ -1,10 +1,11 @@
 import { PLATE_SYMBOL, type PlateNode, type FileContent } from "./protocol.js";
+import { sanitizePath } from "./utils.js";
 
 export function file(name: string, content: FileContent): PlateNode {
   return {
     [PLATE_SYMBOL]: true,
     async *generate(currentPath) {
-      const resolvedPath = currentPath ? `${currentPath}/${name}` : name;
+      const resolvedPath = sanitizePath(currentPath, name);
       let finalContent: string | Uint8Array;
       const evaluated = typeof content === "function" ? await content() : content;
 
@@ -24,7 +25,7 @@ export function dir(name: string, ...children: any[]): PlateNode {
     [PLATE_SYMBOL]: true,
     async *generate(currentPath) {
       const nextPath = name 
-        ? (currentPath ? `${currentPath}/${name}` : name)
+        ? sanitizePath(currentPath, name)
         : currentPath;
       
       for (const child of children.flat(Infinity)) {
