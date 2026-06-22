@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/ilyeshdz/ts-treegen/compare/0.1.0...0.1.1) (2026-06-22)
+
+### Bug Fixes
+
+* handle null, undefined, and empty file content gracefully ([154b0a0](https://github.com/ilyeshdz/ts-treegen/commit/154b0a0f6ee0be26282de4378f3ca5052445e8af))
+* harden path resolution against edge cases and traversals ([8448393](https://github.com/ilyeshdz/ts-treegen/commit/84483939e3214769b6e8a6fa256a6bff73619a5d))
+
 ## 0.1.0 (2026-06-22)
 
 ### Features
