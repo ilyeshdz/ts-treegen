@@ -9,7 +9,9 @@ export function file(name: string, content: FileContent): PlateNode {
       let finalContent: string | Uint8Array;
       const evaluated = typeof content === "function" ? await content() : content;
 
-      if (evaluated instanceof Uint8Array || typeof evaluated === "string") {
+      if (evaluated === undefined || evaluated === null) {
+        finalContent = "";
+      } else if (evaluated instanceof Uint8Array || typeof evaluated === "string") {
         finalContent = evaluated;
       } else {
         finalContent = JSON.stringify(evaluated, null, 2);
