@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/ilyeshdz/ts-treegen/compare/0.1.1...0.1.2) (2026-06-23)
+
+### Bug Fixes
+
+* make content parameter optional in file function ([eff2ed2](https://github.com/ilyeshdz/ts-treegen/commit/eff2ed2088cdbdd5146ab9191aa9b776f91365d8))
+* remove directory traversal check from emit function ([27f505c](https://github.com/ilyeshdz/ts-treegen/commit/27f505cab830b0773a03295a2b62780846b443e6))
+
 ## [0.1.1](https://github.com/ilyeshdz/ts-treegen/compare/0.1.0...0.1.1) (2026-06-22)
 
 ### Bug Fixes
