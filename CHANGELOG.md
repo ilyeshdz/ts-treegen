@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://github.com/ilyeshdz/ts-treegen/compare/0.2.0...0.3.0) (2026-06-23)
+
+### Features
+
+* enhance documentation with detailed JSDoc comments for core functions ([72a1140](https://github.com/ilyeshdz/ts-treegen/commit/72a11405759e15ca865e54b839f722e50513e50d))
+
+### Bug Fixes
+
+* guard Windows absolute paths and tighten .. check ([870b437](https://github.com/ilyeshdz/ts-treegen/commit/870b4376d1ce2f5ba6dc78dce4e881aa7d774a62))
+
+### Documentation
+
+* update README with new API details and examples ([2dd3d6e](https://github.com/ilyeshdz/ts-treegen/commit/2dd3d6e95815defa1ddf5c2814e6f58907db58d0))
+
 ## [0.2.0](https://github.com/ilyeshdz/ts-treegen/compare/0.1.2...0.2.0) (2026-06-23)
 
 ### Features
