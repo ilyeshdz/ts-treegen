@@ -48,7 +48,7 @@ export function file(name: string, content?: FileContent): PlateNode {
  */
 function flattenIfNested<T>(arr: T[]): T[] {
   for (let i = 0; i < arr.length; i++) {
-    if (Array.isArray(arr[i])) return arr.flat(Infinity);
+    if (Array.isArray(arr[i])) return arr.flat(Infinity) as T[];
   }
   return arr;
 }
