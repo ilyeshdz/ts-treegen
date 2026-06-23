@@ -61,9 +61,13 @@ export function dir(name: string, ...children: any[]): PlateNode {
       const nextPath = name ? sanitizePath(currentPath, name) : currentPath;
 
       const files: VirtualFile[] = [];
-      for (const child of flatChildren) {
+      for (let i = 0; i < flatChildren.length; i++) {
+        const child = flatChildren[i];
         if (child && child[PLATE_SYMBOL]) {
-          files.push(...(await child.generate(nextPath)));
+          const childFiles = await child.generate(nextPath);
+          for (let j = 0; j < childFiles.length; j++) {
+            files.push(childFiles[j]);
+          }
         }
       }
       return files;
