@@ -29,7 +29,7 @@ export function file(name: string, content?: FileContent): PlateNode {
       }
 
       return [{ path: resolvedPath, content: finalContent }];
-    }
+    },
   };
 }
 
@@ -49,9 +49,7 @@ export function dir(name: string, ...children: any[]): PlateNode {
   return {
     [PLATE_SYMBOL]: true,
     async generate(currentPath) {
-      const nextPath = name 
-        ? sanitizePath(currentPath, name)
-        : currentPath;
+      const nextPath = name ? sanitizePath(currentPath, name) : currentPath;
 
       const files: VirtualFile[] = [];
       for (const child of flatChildren) {
@@ -60,6 +58,6 @@ export function dir(name: string, ...children: any[]): PlateNode {
         }
       }
       return files;
-    }
+    },
   };
 }

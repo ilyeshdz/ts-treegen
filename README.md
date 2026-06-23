@@ -4,7 +4,7 @@ Tiny, low-level engine for programmatic file generation.
 
 [![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/ts-treegen)](https://npmx.dev/package/ts-treegen)
 [![Open on npmx.dev](https://npmx.dev/api/registry/badge/size/ts-treegen)](https://npmx.dev/package/ts-treegen)
-[![Open on npmx.dev](https://npmx.dev/api/registry/badge/license/ts-treegen)](https://npmx.dev/package/ts-treegen) 
+[![Open on npmx.dev](https://npmx.dev/api/registry/badge/license/ts-treegen)](https://npmx.dev/package/ts-treegen)
 
 `ts-treegen` is a zero-dependency, ultra-lightweight engine designed to describe complex file structures completely as data and safely resolve them. it acts as the functional compilation layer that you can build your own generators, scaffolding tools, and clis on top of.
 
@@ -25,14 +25,15 @@ const isProduction = process.env.NODE_ENV === "production";
 // 1. build your layout configuration completely as pure data
 const files = await emit(
   file("README.md", "# my new app setup"),
-  
-  dir("src",
+
+  dir(
+    "src",
     file("index.js", "console.log('hello core engine');"),
     // native js conditionals are handled gracefully out-of-the-box
     !isProduction && file("debug-logger.js", "console.warn('dev mode enabled');"),
     // objects are automatically stringified to pretty json
-    file("package.json", { name: "my-app", version: "1.0.0" })
-  )
+    file("package.json", { name: "my-app", version: "1.0.0" }),
+  ),
 );
 
 // 2. returns an explicit flat array of virtual objects ready to process
@@ -85,11 +86,7 @@ interface VirtualFile {
   content: string | Uint8Array;
 }
 
-type FileContent =
-  | string
-  | Uint8Array
-  | Record<string, any>
-  | (() => any | Promise<any>);
+type FileContent = string | Uint8Array | Record<string, any> | (() => any | Promise<any>);
 ```
 
 ## license

@@ -24,7 +24,7 @@ export async function write(files: VirtualFile[], options: WriteOptions = {}) {
     const absolutePath = join(base, file.path);
 
     await mkdir(dirname(absolutePath), {
-      recursive: true
+      recursive: true,
     });
 
     await writeFile(absolutePath, file.content);

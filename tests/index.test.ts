@@ -8,19 +8,12 @@ import { rm } from "fs/promises";
 
 describe("ts-treegen core", () => {
   it("should compile a basic flat file layout", async () => {
-    const layout = await emit(
-      file("README.md", "# Hello World"),
-    );
-    expect(layout).toEqual([
-      { path: "README.md", content: "# Hello World" },
-    ]);
+    const layout = await emit(file("README.md", "# Hello World"));
+    expect(layout).toEqual([{ path: "README.md", content: "# Hello World" }]);
   });
 
   it("should handle multiple top-level files", async () => {
-    const layout = await emit(
-      file("a.txt", "aaa"),
-      file("b.txt", "bbb"),
-    );
+    const layout = await emit(file("a.txt", "aaa"), file("b.txt", "bbb"));
     expect(layout).toHaveLength(2);
     expect(layout).toContainEqual({ path: "a.txt", content: "aaa" });
     expect(layout).toContainEqual({ path: "b.txt", content: "bbb" });
@@ -29,23 +22,15 @@ describe("ts-treegen core", () => {
   it("should handle nested directories with native JS array filtering", async () => {
     const isProd = false;
     const layout = await emit(
-      dir("src",
-        file("index.js", "console.log(1)"),
-        isProd && file("analytics.js", "track()"),
-      ),
+      dir("src", file("index.js", "console.log(1)"), isProd && file("analytics.js", "track()")),
     );
-    expect(layout).toEqual([
-      { path: "src/index.js", content: "console.log(1)" },
-    ]);
+    expect(layout).toEqual([{ path: "src/index.js", content: "console.log(1)" }]);
   });
 
   it("should include files when conditional is true", async () => {
     const debug = true;
     const layout = await emit(
-      dir("src",
-        file("index.js", "main"),
-        debug && file("debug.js", "debug"),
-      ),
+      dir("src", file("index.js", "main"), debug && file("debug.js", "debug")),
     );
     expect(layout).toEqual([
       { path: "src/index.js", content: "main" },
@@ -54,14 +39,7 @@ describe("ts-treegen core", () => {
   });
 
   it("should filter null and undefined children", async () => {
-    const layout = await emit(
-      dir("root",
-        file("a.ts", "a"),
-        null,
-        undefined,
-        file("b.ts", "b"),
-      ),
-    );
+    const layout = await emit(dir("root", file("a.ts", "a"), null, undefined, file("b.ts", "b")));
     expect(layout).toEqual([
       { path: "root/a.ts", content: "a" },
       { path: "root/b.ts", content: "b" },
@@ -70,9 +48,7 @@ describe("ts-treegen core", () => {
 
   it("should deeply flatten nested arrays", async () => {
     const files = [file("1.ts", "1"), file("2.ts", "2")];
-    const layout = await emit(
-      dir("lib", [files, file("3.ts", "3")]),
-    );
+    const layout = await emit(dir("lib", [files, file("3.ts", "3")]));
     expect(layout).toEqual([
       { path: "lib/1.ts", content: "1" },
       { path: "lib/2.ts", content: "2" },
@@ -82,16 +58,14 @@ describe("ts-treegen core", () => {
 
   it("should handle deeply nested directory structure", async () => {
     const layout = await emit(
-      dir("project",
-        dir("src",
-          dir("components",
-            file("Button.tsx", "export const Button = () => null"),
-          ),
+      dir(
+        "project",
+        dir(
+          "src",
+          dir("components", file("Button.tsx", "export const Button = () => null")),
           file("index.ts", "export {}"),
         ),
-        dir("tests",
-          file("test.ts", "test"),
-        ),
+        dir("tests", file("test.ts", "test")),
       ),
     );
     expect(layout).toEqual([
@@ -111,61 +85,41 @@ describe("ts-treegen core", () => {
   });
 
   it("should protect against nested traversal", async () => {
-    const layout = emit(
-      dir("safe", file("../../etc/passwd", "evil")),
-    );
+    const layout = emit(dir("safe", file("../../etc/passwd", "evil")));
     await expect(layout).rejects.toThrow();
   });
 
   it("should use empty string for missing content", async () => {
     const layout = await emit(file("empty.txt"));
-    expect(layout).toEqual([
-      { path: "empty.txt", content: "" },
-    ]);
+    expect(layout).toEqual([{ path: "empty.txt", content: "" }]);
   });
 
   it("should handle Uint8Array content", async () => {
     const binary = new Uint8Array([0, 1, 2, 255]);
     const layout = await emit(file("binary.bin", binary));
-    expect(layout).toEqual([
-      { path: "binary.bin", content: binary },
-    ]);
+    expect(layout).toEqual([{ path: "binary.bin", content: binary }]);
   });
 
   it("should auto-serialize objects to pretty-printed JSON", async () => {
-    const layout = await emit(
-      file("config.json", { name: "test", version: 1 }),
-    );
+    const layout = await emit(file("config.json", { name: "test", version: 1 }));
     expect(layout).toEqual([
       { path: "config.json", content: JSON.stringify({ name: "test", version: 1 }, null, 2) },
     ]);
   });
 
   it("should evaluate lazy factory functions", async () => {
-    const layout = await emit(
-      file("dynamic.txt", () => "lazy value"),
-    );
-    expect(layout).toEqual([
-      { path: "dynamic.txt", content: "lazy value" },
-    ]);
+    const layout = await emit(file("dynamic.txt", () => "lazy value"));
+    expect(layout).toEqual([{ path: "dynamic.txt", content: "lazy value" }]);
   });
 
   it("should await async factory functions", async () => {
-    const layout = await emit(
-      file("async.txt", async () => "async value"),
-    );
-    expect(layout).toEqual([
-      { path: "async.txt", content: "async value" },
-    ]);
+    const layout = await emit(file("async.txt", async () => "async value"));
+    expect(layout).toEqual([{ path: "async.txt", content: "async value" }]);
   });
 
   it("should coerce null from lazy factory to empty string", async () => {
-    const layout = await emit(
-      file("maybe.txt", () => null),
-    );
-    expect(layout).toEqual([
-      { path: "maybe.txt", content: "" },
-    ]);
+    const layout = await emit(file("maybe.txt", () => null));
+    expect(layout).toEqual([{ path: "maybe.txt", content: "" }]);
   });
 
   it("should coerce undefined from lazy factory to empty string", async () => {
@@ -175,10 +129,7 @@ describe("ts-treegen core", () => {
 
   it("should use empty string for root boundary dir", async () => {
     const layout = await emit(
-      dir("",
-        dir("src", file("index.ts", "foo")),
-        file("README.md", "# Hi"),
-      ),
+      dir("", dir("src", file("index.ts", "foo")), file("README.md", "# Hi")),
     );
     expect(layout).toEqual([
       { path: "src/index.ts", content: "foo" },
