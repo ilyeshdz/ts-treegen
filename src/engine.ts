@@ -11,6 +11,7 @@ import type { VirtualFile } from "./protocol.js";
  * @returns Flat array of resolved virtual files.
  */
 export async function emit(...nodes: any[]): Promise<VirtualFile[]> {
+  if (nodes.length === 0) return [];
   const rootNode = dir("", ...nodes);
   return rootNode.generate("");
 }
