@@ -203,10 +203,19 @@ describe("sanitizePath utility", () => {
     );
   });
 
-  it("should reject absolute paths", () => {
+  it("should reject absolute Unix paths", () => {
     expect(() => sanitizePath("src", "/etc/passwd")).toThrow(
       "Directory traversal or absolute path violation: /etc/passwd",
     );
+  });
+
+  it("should reject absolute Windows paths", () => {
+    expect(() => sanitizePath("src", "C:\\etc\\passwd")).toThrow();
+    expect(() => sanitizePath("src", "Z:/etc/passwd")).toThrow();
+  });
+
+  it("should reject UNC paths", () => {
+    expect(() => sanitizePath("src", "\\\\server\\share\\file")).toThrow();
   });
 
   it("should resolve redundant slashes", () => {

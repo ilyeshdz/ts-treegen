@@ -13,13 +13,13 @@ import { normalize, resolve } from "node:path";
  * @returns Normalised combined path.
  */
 export function sanitizePath(basePath: string, segment: string): string {
-  if (segment.startsWith("/")) {
+  if (segment.startsWith("/") || /^[A-Za-z]:[/\\]/.test(segment) || segment.startsWith("\\\\")) {
     throw new Error(`Directory traversal or absolute path violation: ${segment}`);
   }
 
   const combined = normalize(basePath ? `${basePath}/${segment}` : segment);
-  
-  if (combined.startsWith("..")) {
+
+  if (combined === ".." || combined.startsWith("../")) {
     throw new Error(`Directory traversal or absolute path violation: ${segment}`);
   }
   
