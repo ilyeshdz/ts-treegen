@@ -1,7 +1,7 @@
 import { PLATE_SYMBOL, type PlateNode, type FileContent } from "./protocol.js";
 import { sanitizePath } from "./utils.js";
 
-export function file(name: string, content: FileContent): PlateNode {
+export function file(name: string, content?: FileContent): PlateNode {
   return {
     [PLATE_SYMBOL]: true,
     async *generate(currentPath) {
