@@ -45,6 +45,7 @@ export function file(name: string, content?: FileContent): PlateNode {
  * @param children – Nested {@link PlateNode}s or arrays thereof.
  */
 export function dir(name: string, ...children: any[]): PlateNode {
+  const flatChildren = children.flat(Infinity);
   return {
     [PLATE_SYMBOL]: true,
     async *generate(currentPath) {
@@ -52,7 +53,7 @@ export function dir(name: string, ...children: any[]): PlateNode {
         ? sanitizePath(currentPath, name)
         : currentPath;
       
-      for (const child of children.flat(Infinity)) {
+      for (const child of flatChildren) {
         if (child && child[PLATE_SYMBOL]) {
           yield* child.generate(nextPath);
         }
