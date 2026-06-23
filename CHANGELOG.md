@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/ilyeshdz/ts-treegen/compare/0.1.2...0.2.0) (2026-06-23)
+
+### Features
+
+* add nightly workflow for automated releases ([5b0871b](https://github.com/ilyeshdz/ts-treegen/commit/5b0871b4b5cb95cbcd993942308dc42552cf9801))
+* add write function for disk serialization ([be8d4ca](https://github.com/ilyeshdz/ts-treegen/commit/be8d4ca98c6f14fba81f7455a04f54689f5e0fec))
+
 ## [0.1.2](https://github.com/ilyeshdz/ts-treegen/compare/0.1.1...0.1.2) (2026-06-23)
 
 ### Bug Fixes
