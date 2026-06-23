@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/ilyeshdz/ts-treegen/compare/0.3.0...0.3.1) (2026-06-23)
+
+### Performance
+
+* move children flattening out of hot path ([2c3a4e8](https://github.com/ilyeshdz/ts-treegen/commit/2c3a4e833b80899f7442ebe4073ac1d47fb3af40))
+* replace async generators with direct async collection ([a2ae66a](https://github.com/ilyeshdz/ts-treegen/commit/a2ae66a3ec1a07173202bc5426a00179517bad64))
+
 ## [0.3.0](https://github.com/ilyeshdz/ts-treegen/compare/0.2.0...0.3.0) (2026-06-23)
 
 ### Features
