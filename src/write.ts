@@ -1,6 +1,6 @@
-import { dirname, join } from "path";
-import type { VirtualFile } from "./protocol";
-import { mkdir, writeFile } from "fs/promises";
+import { dirname, join } from "node:path";
+import type { VirtualFile } from "./protocol.js";
+import { mkdir, writeFile } from "node:fs/promises";
 
 const MAX_CONCURRENCY = 50;
 
