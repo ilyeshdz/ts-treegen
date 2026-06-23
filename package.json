@@ -31,8 +31,7 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "fmt": "oxfmt",
-    "fmt:check": "oxfmt --check",
-    "prepare": "husky"
+    "fmt:check": "oxfmt --check"
   },
   "devDependencies": {
     "@release-it/conventional-changelog": "^11.0.1",
