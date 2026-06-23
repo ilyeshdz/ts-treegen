@@ -23,9 +23,9 @@ export type FileContent = string | Uint8Array | Record<string, any> | (() => any
 export interface PlateNode {
   [PLATE_SYMBOL]: true;
   /**
-   * Yields all {@link VirtualFile} entries reachable from this node given
+   * Returns all {@link VirtualFile} entries reachable from this node given
    * the accumulated path prefix so far.
    * @param currentPath – Normalised path inherited from ancestor directories.
    */
-  generate(currentPath: string): AsyncGenerator<VirtualFile, void, unknown>;
+  generate(currentPath: string): Promise<VirtualFile[]>;
 }

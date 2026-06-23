@@ -1,4 +1,4 @@
-import { PLATE_SYMBOL, type PlateNode, type FileContent } from "./protocol.js";
+import { PLATE_SYMBOL, type PlateNode, type VirtualFile, type FileContent } from "./protocol.js";
 import { sanitizePath } from "./utils.js";
 
 /**
@@ -15,10 +15,10 @@ import { sanitizePath } from "./utils.js";
 export function file(name: string, content?: FileContent): PlateNode {
   return {
     [PLATE_SYMBOL]: true,
-    async *generate(currentPath) {
+    async generate(currentPath) {
       const resolvedPath = sanitizePath(currentPath, name);
-      let finalContent: string | Uint8Array;
       const evaluated = typeof content === "function" ? await content() : content;
+      let finalContent: string | Uint8Array;
 
       if (evaluated === undefined || evaluated === null) {
         finalContent = "";
@@ -28,7 +28,7 @@ export function file(name: string, content?: FileContent): PlateNode {
         finalContent = JSON.stringify(evaluated, null, 2);
       }
 
-      yield { path: resolvedPath, content: finalContent };
+      return [{ path: resolvedPath, content: finalContent }];
     }
   };
 }
@@ -48,16 +48,18 @@ export function dir(name: string, ...children: any[]): PlateNode {
   const flatChildren = children.flat(Infinity);
   return {
     [PLATE_SYMBOL]: true,
-    async *generate(currentPath) {
+    async generate(currentPath) {
       const nextPath = name 
         ? sanitizePath(currentPath, name)
         : currentPath;
-      
+
+      const files: VirtualFile[] = [];
       for (const child of flatChildren) {
         if (child && child[PLATE_SYMBOL]) {
-          yield* child.generate(nextPath);
+          files.push(...(await child.generate(nextPath)));
         }
       }
+      return files;
     }
   };
 }
