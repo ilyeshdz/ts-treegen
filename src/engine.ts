@@ -6,9 +6,6 @@ export async function emit(...nodes: any[]): Promise<VirtualFile[]> {
   const rootNode = dir("", ...nodes);
 
   for await (const file of rootNode.generate("")) {
-    if (file.path.split("/").includes("..") || file.path.startsWith("/")) {
-      throw new Error(`Directory traversal or absolute path violation: ${file.path}`);
-    }
     files.push(file);
   }
   
