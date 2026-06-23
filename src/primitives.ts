@@ -20,9 +20,11 @@ export function file(name: string, content?: FileContent): PlateNode {
       const evaluated = typeof content === "function" ? await content() : content;
       let finalContent: string | Uint8Array;
 
-      if (evaluated === undefined || evaluated === null) {
+      if (typeof evaluated === "string") {
+        finalContent = evaluated;
+      } else if (evaluated === undefined || evaluated === null) {
         finalContent = "";
-      } else if (evaluated instanceof Uint8Array || typeof evaluated === "string") {
+      } else if (evaluated instanceof Uint8Array) {
         finalContent = evaluated;
       } else {
         finalContent = JSON.stringify(evaluated, null, 2);
