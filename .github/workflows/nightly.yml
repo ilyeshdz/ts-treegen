@@ -1,0 +1,39 @@
+name: Nightly
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v2
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 'lts/*'
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm run build
+
+      - run: git config --global user.email "action@github.com"
+      - run: git config --global user.name "GitHub Action"
+
+      - name: Create nightly release
+        run: "pnpm run release --ci --preRelease=nightly --github.preRelease --npm.tag=nightly --git.commitMessage='chore: release v${version} [skip ci]'"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
