@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.2](https://github.com/ilyeshdz/ts-treegen/compare/0.3.1...0.3.2) (2026-06-23)
+
+### Bug Fixes
+
+* add type assertion to flattenIfNested return ([25c8573](https://github.com/ilyeshdz/ts-treegen/commit/25c85733abda96b204e9264bda8f8080ef043598))
+
+### Performance
+
+* defer array flattening in dir() to avoid unnecessary copy ([becf74a](https://github.com/ilyeshdz/ts-treegen/commit/becf74aa6f23b73cc93e4b8b48e0f81cd6abb4e6))
+* early return in emit for empty input ([1435e64](https://github.com/ilyeshdz/ts-treegen/commit/1435e64eac9530cc966e07660d2ab878fdb5485b))
+* optimize content coercion order in file() ([6cd85ec](https://github.com/ilyeshdz/ts-treegen/commit/6cd85ec56db97ac8dd56ee2917deb5221763983a))
+* parallelize file writes with concurrency control ([6a35ded](https://github.com/ilyeshdz/ts-treegen/commit/6a35ded454ce43b82ad53a5a53942442130ec029))
+* replace for...of and spread with indexed loops in dir.generate ([8840aca](https://github.com/ilyeshdz/ts-treegen/commit/8840acad66edb049c144b49b768dc6c6865689da))
+
 ## [0.3.1](https://github.com/ilyeshdz/ts-treegen/compare/0.3.0...0.3.1) (2026-06-23)
 
 ### Performance

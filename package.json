@@ -1,6 +1,6 @@
 {
   "name": "ts-treegen",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Tiny, low-level engine for programmatic file generation.",
   "homepage": "https://github.com/ilyeshdz/ts-treegen#readme",
   "bugs": {
