@@ -46,8 +46,15 @@ export function file(name: string, content?: FileContent): PlateNode {
  * @param name – Directory name, or `""` for a transparent root boundary.
  * @param children – Nested {@link PlateNode}s or arrays thereof.
  */
+function flattenIfNested<T>(arr: T[]): T[] {
+  for (let i = 0; i < arr.length; i++) {
+    if (Array.isArray(arr[i])) return arr.flat(Infinity);
+  }
+  return arr;
+}
+
 export function dir(name: string, ...children: any[]): PlateNode {
-  const flatChildren = children.flat(Infinity);
+  const flatChildren = flattenIfNested(children);
   return {
     [PLATE_SYMBOL]: true,
     async generate(currentPath) {
