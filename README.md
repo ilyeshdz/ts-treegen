@@ -10,7 +10,7 @@ Tiny, low-level engine for programmatic file generation.
 
 ## features
 
-- **protocol driven:** trees are pure, immutable virtual structures driven by asynchronous generator streams for optimal memory usage.
+- **protocol driven:** trees are pure, immutable virtual structures resolved with async functions and indexed loops for optimal memory usage.
 - **zero-abstraction layouts:** no custom template tags or conditional wrapper nodes. use standard javascript logic (`isTs && file()`) directly.
 - **fail-fast safety:** built-in deep path verification traps directory traversal and absolute path escapes before anything touches the disk.
 - **runtime agnostic:** built with modern, native standards. runs everywhere (node.js, bun, deno).
