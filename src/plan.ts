@@ -18,9 +18,6 @@ async function runConcurrently<T>(
   await Promise.all(workers);
 }
 
-/** Whether the file will be written or skipped during execution. */
-export type PlanFileStatus = "write" | "skip";
-
 /** A resolved file in the plan, with its absolute path and status. */
 export interface PlanFile {
   /** Relative path as defined in the virtual file. */
@@ -34,7 +31,7 @@ export interface PlanFile {
    * - `"write"` — file will be written to disk.
    * - `"skip"` — file exists on disk and `overwrite` is `false`, so it will be left untouched.
    */
-  status: PlanFileStatus;
+  status: "write" | "skip";
 }
 
 /** A deferred write plan returned by {@link plan}. */
