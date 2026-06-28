@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.3](https://github.com/ilyeshdz/ts-treegen/compare/0.3.2...0.3.3) (2026-06-28)
+
+### Bug Fixes
+
+* add explicit Promise<void> return type to write() ([4b860f4](https://github.com/ilyeshdz/ts-treegen/commit/4b860f41b8cbbb8d064ae2da3591154b30704af3))
+* check all elements when flattening nested arrays ([d91be6c](https://github.com/ilyeshdz/ts-treegen/commit/d91be6cb4b879f32061b2ff6631691ad74f188ad))
+* replace any with unknown in FileContent and dir children ([23dd988](https://github.com/ilyeshdz/ts-treegen/commit/23dd9880cbffeb0a925ee80806674ae8220bcc0c))
+* type emit parameters as PlateNode[] ([dd3047a](https://github.com/ilyeshdz/ts-treegen/commit/dd3047a332f8abdacb2f751c647a3f3612e0ebc1))
+
+### Documentation
+
+* update protocol driven description to match source code ([29dad98](https://github.com/ilyeshdz/ts-treegen/commit/29dad98fab768b4cf039ff17711c1b1bc12b8a45))
+
 ## [0.3.2](https://github.com/ilyeshdz/ts-treegen/compare/0.3.1...0.3.2) (2026-06-23)
 
 ### Bug Fixes
