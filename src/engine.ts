@@ -1,5 +1,5 @@
 import { dir } from "./primitives.js";
-import type { VirtualFile } from "./protocol.js";
+import type { PlateNode, VirtualFile } from "./protocol.js";
 
 /**
  * Compile a list of nodes into a flat array of {@link VirtualFile} objects.
@@ -10,7 +10,7 @@ import type { VirtualFile } from "./protocol.js";
  * @param nodes – One or more {@link PlateNode}s (e.g. from {@link file} / {@link dir}).
  * @returns Flat array of resolved virtual files.
  */
-export async function emit(...nodes: any[]): Promise<VirtualFile[]> {
+export async function emit(...nodes: PlateNode[]): Promise<VirtualFile[]> {
   if (nodes.length === 0) return [];
   const rootNode = dir("", ...nodes);
   return rootNode.generate("");
