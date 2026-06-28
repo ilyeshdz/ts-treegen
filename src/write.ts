@@ -34,7 +34,7 @@ export interface WriteOptions {
  * @param files – Array of virtual files to write (typically from {@link emit}).
  * @param options – Write options.
  */
-export async function write(files: VirtualFile[], options: WriteOptions = {}) {
+export async function write(files: VirtualFile[], options: WriteOptions = {}): Promise<void> {
   if (files.length === 0) return;
 
   const base = options.targetDir || process.cwd();
