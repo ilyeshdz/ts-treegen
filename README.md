@@ -18,7 +18,7 @@ Tiny, low-level engine for programmatic file generation.
 ## quick start
 
 ```ts
-import { file, dir, emit, write } from "ts-treegen";
+import { file, dir, emit, plan } from "ts-treegen";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -44,8 +44,14 @@ console.log(files);
 //   { path: "src/package.json", content: "{\n  \"name\": \"my-app\",\n..." }
 // ]
 
-// 3. persist the files safely onto the local disk (automatically handles parent directories)
-await write(files, { targetDir: "./output" });
+// 3. create a write plan (no disk I/O yet)
+const p = await plan(files, { targetDir: "./output" });
+
+// inspect what will be written
+console.log(p.files[0].status); // "write"
+
+// 4. persist the files safely onto the local disk
+await p.run();
 ```
 
 ## api
@@ -71,12 +77,40 @@ compiles nodes into a flat array of `VirtualFile` objects. validates and normali
 - `nodes`: any[] — nodes to compile.
 - returns: `Promise<VirtualFile[]>`
 
-### `write(files, options?)`
+### `plan(files, options?)`
 
-writes an array of virtual files to disk using native I/O apis. recursively creates parent directories.
+creates a deferred write plan. returns a [`Plan`](#plan) with the resolved file metadata and per-file execution status. no disk I/O is performed until `.run()` is called.
 
-- `files`: `VirtualFile[]` — array of files to write.
+- `files`: `VirtualFile[]` — array of virtual files to plan (typically from [`emit`](#emitnodes)).
 - `options.targetDir?`: string — base output directory (defaults to `process.cwd()`).
+- `options.overwrite?`: boolean — when `false`, existing files are silently skipped (defaults to `true`).
+- returns: `Promise<Plan>`
+
+### `Plan`
+
+```ts
+interface Plan {
+  files: PlanFile[];
+  run(): Promise<void>;
+}
+```
+
+- `files` — each file with its resolved path and status (see [`PlanFile`](#planfile)).
+- `run()` — execute the plan: create parent directories and write files with status `"write"` to disk.
+
+### `PlanFile`
+
+```ts
+interface PlanFile {
+  path: string;
+  absolutePath: string;
+  content: string | Uint8Array;
+  status: "write" | "skip";
+}
+```
+
+- `status: "write"` — file will be written to disk.
+- `status: "skip"` — file exists on disk and `overwrite` is `false`, so it will be left untouched.
 
 ### types
 
@@ -86,7 +120,7 @@ interface VirtualFile {
   content: string | Uint8Array;
 }
 
-type FileContent = string | Uint8Array | Record<string, any> | (() => any | Promise<any>);
+type FileContent = string | Uint8Array | Record<string, unknown> | (() => any | Promise<any>);
 ```
 
 ## license
