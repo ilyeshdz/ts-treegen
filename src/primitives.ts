@@ -47,10 +47,7 @@ export function file(name: string, content?: FileContent): PlateNode {
  * @param children – Nested {@link PlateNode}s or arrays thereof.
  */
 function flattenIfNested<T>(arr: T[]): T[] {
-  for (let i = 0; i < arr.length; i++) {
-    if (Array.isArray(arr[i])) return arr.flat(Infinity) as T[];
-  }
-  return arr;
+  return arr.some(Array.isArray) ? arr.flat(Infinity) as T[] : arr;
 }
 
 export function dir(name: string, ...children: any[]): PlateNode {
