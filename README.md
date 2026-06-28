@@ -6,123 +6,52 @@ Tiny, low-level engine for programmatic file generation.
 [![Open on npmx.dev](https://npmx.dev/api/registry/badge/size/ts-treegen)](https://npmx.dev/package/ts-treegen)
 [![Open on npmx.dev](https://npmx.dev/api/registry/badge/license/ts-treegen)](https://npmx.dev/package/ts-treegen)
 
-`ts-treegen` is a zero-dependency, ultra-lightweight engine designed to describe complex file structures completely as data and safely resolve them. it acts as the functional compilation layer that you can build your own generators, scaffolding tools, and clis on top of.
+A zero-dependency, ultra-lightweight engine to describe complex file structures as data and resolve them safely. Acts as a functional compilation layer for building generators, scaffolding tools, and CLIs.
 
-## features
+## Features
 
-- **protocol driven:** trees are pure, immutable virtual structures resolved with async functions and indexed loops for optimal memory usage.
-- **zero-abstraction layouts:** no custom template tags or conditional wrapper nodes. use standard javascript logic (`isTs && file()`) directly.
-- **fail-fast safety:** built-in deep path verification traps directory traversal and absolute path escapes before anything touches the disk.
-- **runtime agnostic:** built with modern, native standards. runs everywhere (node.js, bun, deno).
+- **Protocol driven** — Trees are pure, immutable virtual structures resolved with async functions and indexed loops for optimal memory usage.
+- **Zero-abstraction layouts** — No custom template tags or conditional wrapper nodes. Use standard JavaScript logic (`isProd && file(...)`) directly.
+- **Fail-fast safety** — Built-in deep path verification traps directory traversal and absolute path escapes before anything touches the disk.
+- **Runtime agnostic** — Built with modern, native standards. Runs everywhere (Node.js, Bun, Deno).
 
-## quick start
+## Quick start
 
 ```ts
 import { file, dir, emit, plan } from "ts-treegen";
 
 const isProduction = process.env.NODE_ENV === "production";
 
-// 1. build your layout configuration completely as pure data
+// 1. Build your layout as pure data
 const files = await emit(
-  file("README.md", "# my new app setup"),
+  file("README.md", "# My New App"),
 
   dir(
     "src",
-    file("index.js", "console.log('hello core engine');"),
-    // native js conditionals are handled gracefully out-of-the-box
-    !isProduction && file("debug-logger.js", "console.warn('dev mode enabled');"),
-    // objects are automatically stringified to pretty json
+    file("index.ts", "console.log('hello');"),
+    !isProduction && file("debug.ts", "console.warn('dev mode');"),
     file("package.json", { name: "my-app", version: "1.0.0" }),
   ),
 );
 
-// 2. returns an explicit flat array of virtual objects ready to process
+// 2. Inspect the resolved tree
 console.log(files);
 // [
-//   { path: "README.md", content: "# my new app setup" },
-//   { path: "src/index.js", content: "console.log('hello core engine');" },
+//   { path: "README.md", content: "# My New App" },
+//   { path: "src/index.ts", content: "console.log('hello');" },
 //   { path: "src/package.json", content: "{\n  \"name\": \"my-app\",\n..." }
 // ]
 
-// 3. create a write plan (no disk I/O yet)
+// 3. Plan what to write (no disk I/O yet)
 const p = await plan(files, { targetDir: "./output" });
 
-// inspect what will be written
+// 4. Check what will happen
 console.log(p.files[0].status); // "write"
 
-// 4. persist the files safely onto the local disk
+// 5. Execute
 await p.run();
 ```
 
-## api
-
-### `file(name, content?)`
-
-creates a virtual file node.
-
-- `name`: string — relative file path.
-- `content?`: [`FileContent`](#types) — optional content (string, `Uint8Array`, plain object, or async factory function).
-
-### `dir(name, ...children)`
-
-creates a virtual directory node. deeply flattens arrays and filters out falsy values. passing `""` as name creates a root boundary.
-
-- `name`: string — directory name.
-- `children`: any[] — nested nodes or arrays thereof.
-
-### `emit(...nodes)`
-
-compiles nodes into a flat array of `VirtualFile` objects. validates and normalizes all paths via defensive checks.
-
-- `nodes`: any[] — nodes to compile.
-- returns: `Promise<VirtualFile[]>`
-
-### `plan(files, options?)`
-
-creates a deferred write plan. returns a [`Plan`](#plan) with the resolved file metadata and per-file execution status. no disk I/O is performed until `.run()` is called.
-
-- `files`: `VirtualFile[]` — array of virtual files to plan (typically from [`emit`](#emitnodes)).
-- `options.targetDir?`: string — base output directory (defaults to `process.cwd()`).
-- `options.overwrite?`: boolean — when `false`, existing files are silently skipped (defaults to `true`).
-- returns: `Promise<Plan>`
-
-### `Plan`
-
-```ts
-interface Plan {
-  files: PlanFile[];
-  run(): Promise<void>;
-}
-```
-
-- `files` — each file with its resolved path and status (see [`PlanFile`](#planfile)).
-- `run()` — execute the plan: create parent directories and write files with status `"write"` to disk.
-
-### `PlanFile`
-
-```ts
-interface PlanFile {
-  path: string;
-  absolutePath: string;
-  content: string | Uint8Array;
-  status: "write" | "skip";
-}
-```
-
-- `status: "write"` — file will be written to disk.
-- `status: "skip"` — file exists on disk and `overwrite` is `false`, so it will be left untouched.
-
-### types
-
-```ts
-interface VirtualFile {
-  path: string;
-  content: string | Uint8Array;
-}
-
-type FileContent = string | Uint8Array | Record<string, unknown> | (() => any | Promise<any>);
-```
-
-## license
+## License
 
 MIT
