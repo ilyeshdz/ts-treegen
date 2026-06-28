@@ -1,3 +1,4 @@
+export { PLATE_SYMBOL } from "./protocol.js";
 export { file, dir } from "./primitives.js";
 export { emit } from "./engine.js";
 export { plan } from "./plan.js";
