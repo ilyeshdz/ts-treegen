@@ -23,6 +23,7 @@ export function sanitizePath(basePath: string, segment: string): string {
     throw new Error(`Directory traversal or absolute path violation: ${segment}`);
   }
 
+  // Root boundary ("") resolves to "/" so every path is within it, so skip.
   if (basePath) {
     const baseNormalized = normalize(basePath);
     const resolvedBase = resolve("/", baseNormalized);
