@@ -13,11 +13,13 @@ export interface VirtualFile {
  * Union of accepted content types for {@link file}.
  *
  * - `string` / `Uint8Array` – literal content.
- * - `Record<string, any>` – serialised to pretty-printed JSON.
- * - `() => any | Promise<any>` – lazy factory evaluated once per generation.
+ * - `Record<string, unknown>` – serialised to pretty-printed JSON.
+ * - `() => FileContentValue | Promise<FileContentValue>` – lazy factory evaluated once per generation.
  *   `null` / `undefined` results are coerced to an empty string.
  */
-export type FileContent = string | Uint8Array | Record<string, any> | (() => any | Promise<any>);
+type FileContentValue = string | Uint8Array | Record<string, unknown> | null | undefined;
+
+export type FileContent = FileContentValue | (() => FileContentValue | Promise<FileContentValue>);
 
 /** A node in a virtual file-tree that can produce one or more {@link VirtualFile} entries. */
 export interface PlateNode {

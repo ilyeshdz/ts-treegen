@@ -44,13 +44,15 @@ export function file(name: string, content?: FileContent): PlateNode {
  * (useful for merging multiple top-level trees without an extra folder).
  *
  * @param name – Directory name, or `""` for a transparent root boundary.
- * @param children – Nested {@link PlateNode}s or arrays thereof.
+ * @param children – Nested {@link PlateNode}s, arrays thereof, or falsy values (see {@link DirChild}).
  */
-function flattenIfNested<T>(arr: T[]): T[] {
-  return arr.some(Array.isArray) ? arr.flat(Infinity) as T[] : arr;
+export type DirChild = PlateNode | PlateNode[] | false | null | undefined;
+
+function flattenIfNested(arr: unknown[]): unknown[] {
+  return arr.some(Array.isArray) ? arr.flat(Infinity) : arr;
 }
 
-export function dir(name: string, ...children: any[]): PlateNode {
+export function dir(name: string, ...children: unknown[]): PlateNode {
   const flatChildren = flattenIfNested(children);
   return {
     [PLATE_SYMBOL]: true,
@@ -60,8 +62,8 @@ export function dir(name: string, ...children: any[]): PlateNode {
       const files: VirtualFile[] = [];
       for (let i = 0; i < flatChildren.length; i++) {
         const child = flatChildren[i];
-        if (child && child[PLATE_SYMBOL]) {
-          const childFiles = await child.generate(nextPath);
+        if (child && typeof child === "object" && PLATE_SYMBOL in child) {
+          const childFiles = await (child as PlateNode).generate(nextPath);
           for (let j = 0; j < childFiles.length; j++) {
             files.push(childFiles[j]);
           }
