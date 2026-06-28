@@ -1,6 +1,6 @@
 export { file, dir } from "./primitives.js";
 export type { DirChild } from "./primitives.js";
 export { emit } from "./engine.js";
-export { write } from "./write.js";
-export type { WriteOptions } from "./write.js";
+export { plan } from "./plan.js";
+export type { Plan, PlanFile, PlanFileStatus, PlanOptions } from "./plan.js";
 export type { PlateNode, VirtualFile, FileContent } from "./protocol.js";

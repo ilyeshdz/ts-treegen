@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { file, dir, emit, write } from "../src/index.js";
+import { file, dir, emit, plan } from "../src/index.js";
 import { sanitizePath } from "../src/utils.js";
 import { mkdtempSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
@@ -194,7 +194,7 @@ describe("sanitizePath utility", () => {
   });
 });
 
-describe("write to disk", () => {
+describe("plan", () => {
   it("should write files to a temp directory", async () => {
     const tmpDir = mkdtempSync(join(tmpdir(), "ts-treegen-"));
     try {
@@ -202,7 +202,8 @@ describe("write to disk", () => {
         file("hello.txt", "world"),
         dir("nested", file("deep.txt", "content")),
       );
-      await write(files, { targetDir: tmpDir });
+      const p = await plan(files, { targetDir: tmpDir });
+      await p.run();
 
       expect(existsSync(join(tmpDir, "hello.txt"))).toBe(true);
       expect(readFileSync(join(tmpDir, "hello.txt"), "utf-8")).toBe("world");
@@ -213,8 +214,9 @@ describe("write to disk", () => {
     }
   });
 
-  it("should default targetDir to cwd when no options given", () => {
-    expect(() => write([])).not.toThrow();
+  it("should default targetDir to cwd when no options given", async () => {
+    const p = await plan([]);
+    await expect(p.run()).resolves.toBeUndefined();
   });
 
   it("should write binary content correctly", async () => {
@@ -222,10 +224,76 @@ describe("write to disk", () => {
     try {
       const binary = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
       const files = await emit(file("data.bin", binary));
-      await write(files, { targetDir: tmpDir });
+      const p = await plan(files, { targetDir: tmpDir });
+      await p.run();
 
       const written = readFileSync(join(tmpDir, "data.bin"));
       expect([...written]).toEqual([0xde, 0xad, 0xbe, 0xef]);
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("should return a plan with resolved absolute paths and default status", async () => {
+    const files = await emit(file("test.txt", "hello"));
+    const p = await plan(files, { targetDir: "/tmp" });
+
+    expect(p.files).toHaveLength(1);
+    expect(p.files[0].path).toBe("test.txt");
+    expect(p.files[0].absolutePath).toBe("/tmp/test.txt");
+    expect(p.files[0].content).toBe("hello");
+    expect(p.files[0].status).toBe("write");
+  });
+
+  it("should not write to disk until run() is called", async () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), "ts-treegen-"));
+    try {
+      const files = await emit(file("should-not-exist.txt", "nope"));
+      await plan(files, { targetDir: tmpDir });
+
+      expect(existsSync(join(tmpDir, "should-not-exist.txt"))).toBe(false);
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("should mark existing files as skip when overwrite is false", async () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), "ts-treegen-"));
+    try {
+      const files = await emit(file("existing.txt", "original"), file("new.txt", "new"));
+      const p1 = await plan(files, { targetDir: tmpDir, overwrite: false });
+      await p1.run();
+
+      const files2 = await emit(
+        file("existing.txt", "overwritten"),
+        file("also-new.txt", "also-new"),
+      );
+      const p2 = await plan(files2, { targetDir: tmpDir, overwrite: false });
+
+      expect(p2.files[0].status).toBe("skip");
+      expect(p2.files[1].status).toBe("write");
+      await p2.run();
+
+      expect(readFileSync(join(tmpDir, "existing.txt"), "utf-8")).toBe("original");
+      expect(readFileSync(join(tmpDir, "also-new.txt"), "utf-8")).toBe("also-new");
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("should allow overwrite when overwrite is not set", async () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), "ts-treegen-"));
+    try {
+      const files = await emit(file("test.txt", "first"));
+      const p1 = await plan(files, { targetDir: tmpDir });
+      await p1.run();
+
+      const files2 = await emit(file("test.txt", "second"));
+      const p2 = await plan(files2, { targetDir: tmpDir });
+      expect(p2.files[0].status).toBe("write");
+      await p2.run();
+
+      expect(readFileSync(join(tmpDir, "test.txt"), "utf-8")).toBe("second");
     } finally {
       await rm(tmpDir, { recursive: true, force: true });
     }
