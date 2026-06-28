@@ -9,11 +9,10 @@ async function runConcurrently<T>(
   fn: (item: T) => Promise<void>,
   limit: number,
 ): Promise<void> {
-  const queue = items.slice();
   let index = 0;
-  const workers = Array.from({ length: Math.min(limit, queue.length) }, async () => {
-    while (index < queue.length) {
-      await fn(queue[index++]);
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (index < items.length) {
+      await fn(items[index++]);
     }
   });
   await Promise.all(workers);
