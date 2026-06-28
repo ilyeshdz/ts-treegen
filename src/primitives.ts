@@ -44,9 +44,8 @@ export function file(name: string, content?: FileContent): PlateNode {
  * (useful for merging multiple top-level trees without an extra folder).
  *
  * @param name – Directory name, or `""` for a transparent root boundary.
- * @param children – Nested {@link PlateNode}s, arrays thereof, or falsy values (see {@link DirChild}).
+ * @param children – Nested {@link PlateNode}s, arrays thereof, or falsy values.
  */
-export type DirChild = PlateNode | PlateNode[] | false | null | undefined;
 
 function flattenIfNested(arr: unknown[]): unknown[] {
   return arr.some(Array.isArray) ? arr.flat(Infinity) : arr;
