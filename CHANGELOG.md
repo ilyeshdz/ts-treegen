@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.4.0](https://github.com/ilyeshdz/ts-treegen/compare/0.3.3...0.4.0) (2026-07-03)
+
+### Features
+
+* replace write() with plan() ([9d940e9](https://github.com/ilyeshdz/ts-treegen/commit/9d940e9bf5408edec220c5bee42b2523443b30f1))
+
+### Bug Fixes
+
+* inline PlanFileStatus type into PlanFile ([bd8b988](https://github.com/ilyeshdz/ts-treegen/commit/bd8b988b396408f48ebedae77df40278be5a64b0))
+* re-export PLATE_SYMBOL from main entry point ([d7b7861](https://github.com/ilyeshdz/ts-treegen/commit/d7b78612f24fe209d12548419a438a6b7bd6d094))
+* remove unused DirChild export from public API ([f792194](https://github.com/ilyeshdz/ts-treegen/commit/f79219442eabfc272c0e8333a58cd331d38c12c3))
+
+### Documentation
+
+* rewrite README without API section ([361766a](https://github.com/ilyeshdz/ts-treegen/commit/361766a4fb5aa7dd2596eb27cae9ba99be421705))
+* update README for plan() API ([2dc1705](https://github.com/ilyeshdz/ts-treegen/commit/2dc17059dc0c4476cabe5d6387afeb82d6d5e68e))
+
+### Performance
+
+* remove unnecessary array copy in runConcurrently ([aee008a](https://github.com/ilyeshdz/ts-treegen/commit/aee008a79eb33bcfcb3c1d23eb149b63819d2f24))
+
 ## [0.3.3](https://github.com/ilyeshdz/ts-treegen/compare/0.3.2...0.3.3) (2026-06-28)
 
 ### Bug Fixes
