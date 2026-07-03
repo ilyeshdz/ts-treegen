@@ -98,8 +98,11 @@ export async function plan(files: VirtualFile[], options: PlanOptions = {}): Pro
         try {
           await io.access(f.absolutePath);
           f.status = "skip";
-        } catch {
-          // file doesn't exist — keep as "write"
+        } catch (err) {
+          const nodeError = err as { code?: string } | null;
+          if (nodeError?.code !== "ENOENT" && nodeError?.code !== "ENOTDIR") {
+            throw err;
+          }
         }
       }),
     );

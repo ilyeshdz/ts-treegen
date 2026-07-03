@@ -29,7 +29,7 @@ describe("MemoryFileSystem", () => {
 
   it("should reject access for missing files", async () => {
     const fs = createMemoryFs();
-    await expect(fs.access("/nope.txt")).rejects.toThrow("File not found");
+    await expect(fs.access("/nope.txt")).rejects.toThrow("ENOENT");
   });
 
   it("mkdir should be a no-op", async () => {

@@ -12,7 +12,11 @@ export function createMemoryFs(initial?: Record<string, string | Uint8Array>): M
   return {
     cwd: () => "/",
     access: async (path: string) => {
-      if (!store.has(path)) throw new Error(`File not found: ${path}`);
+      if (!store.has(path)) {
+        const err = new Error(`ENOENT: no such file or directory, access '${path}'`);
+        (err as { code?: string }).code = "ENOENT";
+        throw err;
+      }
     },
     mkdir: async (_path: string, _opts: { recursive: boolean }) => {},
     writeFile: async (path: string, content: string | Uint8Array) => {
