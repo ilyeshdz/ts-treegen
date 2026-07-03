@@ -25,7 +25,7 @@ export function dirname(p: string): string {
 }
 
 export function join(...parts: string[]): string {
-  return parts.filter(Boolean).join("/");
+  return parts.filter(Boolean).join("/").replace(/\/+/g, "/");
 }
 
 export function sanitizePath(basePath: string, segment: string): string {

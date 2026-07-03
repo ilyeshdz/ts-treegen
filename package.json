@@ -18,6 +18,11 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",
+    "./node": "./dist/node.mjs",
+    "./deno": "./dist/deno.mjs",
+    "./bun": "./dist/bun.mjs",
+    "./memory": "./dist/memory.mjs",
+    "./cloudflare": "./dist/cloudflare.mjs",
     "./package.json": "./package.json"
   },
   "scripts": {
