@@ -16,10 +16,7 @@ import { mkdir } from "node:fs/promises";
 
 const bunFs: FileSystem = {
   cwd: () => process.cwd(),
-  access: async (path: string) => {
-    const exists = await Bun.file(path).exists();
-    if (!exists) throw new Error("File does not exist");
-  },
+  exists: async (path: string) => Bun.file(path).exists(),
   mkdir: (path: string, opts: { recursive: boolean }) =>
     mkdir(path, { recursive: opts.recursive }).then(() => {}),
   writeFile: (path: string, content: string | Uint8Array) =>

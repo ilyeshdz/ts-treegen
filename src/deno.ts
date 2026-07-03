@@ -17,9 +17,13 @@ import type { Plan, PlanOptions } from "./plan.js";
 
 const denoFs: FileSystem = {
   cwd: () => Deno.cwd(),
-  access: async (path: string) => {
-    const info = await Deno.stat(path);
-    if (!info.isFile) throw new Error("Not a file");
+  exists: async (path: string) => {
+    try {
+      const info = await Deno.stat(path);
+      return info.isFile;
+    } catch {
+      return false;
+    }
   },
   mkdir: (path: string, opts: { recursive: boolean }) =>
     Deno.mkdir(path, { recursive: opts.recursive }),

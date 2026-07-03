@@ -1,6 +1,6 @@
 export interface MemoryFileSystem {
   cwd(): string;
-  access(path: string): Promise<void>;
+  exists(path: string): Promise<boolean>;
   mkdir(path: string, options: { recursive: boolean }): Promise<void>;
   writeFile(path: string, content: string | Uint8Array): Promise<void>;
   snapshot(): Record<string, string | Uint8Array>;
@@ -21,13 +21,7 @@ export function createMemoryFs(initial?: Record<string, string | Uint8Array>): M
 
   return {
     cwd: () => "/",
-    access: async (path: string) => {
-      if (!store.has(path)) {
-        const err = new Error(`ENOENT: no such file or directory, access '${path}'`);
-        (err as { code?: string }).code = "ENOENT";
-        throw err;
-      }
-    },
+    exists: async (path: string) => store.has(path),
     mkdir: async (path: string, _opts: { recursive: boolean }) => {
       addDir(path);
     },

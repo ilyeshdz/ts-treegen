@@ -22,15 +22,15 @@ describe("MemoryFileSystem", () => {
     expect(fs.snapshot()["/data.bin"]).toBe(bin);
   });
 
-  it("should resolve access for stored files", async () => {
+  it("should report existence for stored files", async () => {
     const fs = createMemoryFs();
     await fs.writeFile("/exists.txt", "yep");
-    await expect(fs.access("/exists.txt")).resolves.toBeUndefined();
+    await expect(fs.exists("/exists.txt")).resolves.toBe(true);
   });
 
-  it("should reject access for missing files", async () => {
+  it("should report non-existence for missing files", async () => {
     const fs = createMemoryFs();
-    await expect(fs.access("/nope.txt")).rejects.toThrow("ENOENT");
+    await expect(fs.exists("/nope.txt")).resolves.toBe(false);
   });
 
   it("mkdir should track directories", async () => {

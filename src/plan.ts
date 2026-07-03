@@ -95,14 +95,8 @@ export async function plan(files: VirtualFile[], options: PlanOptions = {}): Pro
   if (options.overwrite === false && io) {
     await Promise.all(
       planFiles.map(async (f) => {
-        try {
-          await io.access(f.absolutePath);
+        if (await io.exists(f.absolutePath)) {
           f.status = "skip";
-        } catch (err) {
-          const nodeError = err as { code?: string } | null;
-          if (nodeError?.code !== "ENOENT" && nodeError?.code !== "ENOTDIR") {
-            throw err;
-          }
         }
       }),
     );

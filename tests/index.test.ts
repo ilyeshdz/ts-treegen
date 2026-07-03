@@ -9,7 +9,14 @@ import { rm, access, mkdir, writeFile } from "fs/promises";
 
 const nodeFs: FileSystem = {
   cwd: () => process.cwd(),
-  access,
+  exists: async (path: string) => {
+    try {
+      await access(path);
+      return true;
+    } catch {
+      return false;
+    }
+  },
   mkdir: (p, o) => mkdir(p, o).then(() => {}),
   writeFile,
 };

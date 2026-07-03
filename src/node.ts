@@ -12,7 +12,14 @@ import { cwd } from "node:process";
 
 const nodeFs: FileSystem = {
   cwd,
-  access,
+  exists: async (path: string) => {
+    try {
+      await access(path);
+      return true;
+    } catch {
+      return false;
+    }
+  },
   mkdir: (p, o) => mkdir(p, o).then(() => {}),
   writeFile,
 };
