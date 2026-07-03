@@ -9,12 +9,24 @@ async function runConcurrently<T>(
   limit: number,
 ): Promise<void> {
   let index = 0;
+  let aborted = false;
+  const errors: unknown[] = [];
   const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (index < items.length) {
-      await fn(items[index++]);
+    while (index < items.length && !aborted) {
+      const i = index++;
+      try {
+        await fn(items[i]);
+      } catch (e) {
+        errors.push(e);
+        aborted = true;
+        break;
+      }
     }
   });
   await Promise.all(workers);
+  if (errors.length > 0) {
+    throw errors[0];
+  }
 }
 
 /** A resolved file in the plan, with its absolute path and status. */
