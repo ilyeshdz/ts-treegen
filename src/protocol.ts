@@ -1,3 +1,11 @@
+/** Runtime-agnostic filesystem interface for the write plan. */
+export interface FileSystem {
+  cwd(): string;
+  access(path: string): Promise<void>;
+  mkdir(path: string, options: { recursive: boolean }): Promise<void>;
+  writeFile(path: string, content: string | Uint8Array): Promise<void>;
+}
+
 /** Internal brand symbol used to identify PlateNodes at runtime. */
 export const PLATE_SYMBOL = Symbol.for("ts-plate.node");
 

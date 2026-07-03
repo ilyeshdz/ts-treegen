@@ -1,10 +1,18 @@
 import { describe, it, expect } from "vitest";
 import { file, dir, emit, plan } from "../src/index.js";
+import type { FileSystem } from "../src/index.js";
 import { sanitizePath } from "../src/utils.js";
 import { mkdtempSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
-import { rm } from "fs/promises";
+import { rm, access, mkdir, writeFile } from "fs/promises";
+
+const nodeFs: FileSystem = {
+  cwd: () => process.cwd(),
+  access,
+  mkdir: (p, o) => mkdir(p, o).then(() => {}),
+  writeFile,
+};
 
 describe("ts-treegen core", () => {
   it("should compile a basic flat file layout", async () => {
@@ -202,7 +210,7 @@ describe("plan", () => {
         file("hello.txt", "world"),
         dir("nested", file("deep.txt", "content")),
       );
-      const p = await plan(files, { targetDir: tmpDir });
+      const p = await plan(files, { targetDir: tmpDir, fs: nodeFs });
       await p.run();
 
       expect(existsSync(join(tmpDir, "hello.txt"))).toBe(true);
@@ -214,9 +222,8 @@ describe("plan", () => {
     }
   });
 
-  it("should default targetDir to cwd when no options given", async () => {
-    const p = await plan([]);
-    await expect(p.run()).resolves.toBeUndefined();
+  it("should require targetDir or fs when no options given", async () => {
+    await expect(plan([])).rejects.toThrow("Provide targetDir or a FileSystem");
   });
 
   it("should write binary content correctly", async () => {
@@ -224,7 +231,7 @@ describe("plan", () => {
     try {
       const binary = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
       const files = await emit(file("data.bin", binary));
-      const p = await plan(files, { targetDir: tmpDir });
+      const p = await plan(files, { targetDir: tmpDir, fs: nodeFs });
       await p.run();
 
       const written = readFileSync(join(tmpDir, "data.bin"));
@@ -261,14 +268,14 @@ describe("plan", () => {
     const tmpDir = mkdtempSync(join(tmpdir(), "ts-treegen-"));
     try {
       const files = await emit(file("existing.txt", "original"), file("new.txt", "new"));
-      const p1 = await plan(files, { targetDir: tmpDir, overwrite: false });
+      const p1 = await plan(files, { targetDir: tmpDir, overwrite: false, fs: nodeFs });
       await p1.run();
 
       const files2 = await emit(
         file("existing.txt", "overwritten"),
         file("also-new.txt", "also-new"),
       );
-      const p2 = await plan(files2, { targetDir: tmpDir, overwrite: false });
+      const p2 = await plan(files2, { targetDir: tmpDir, overwrite: false, fs: nodeFs });
 
       expect(p2.files[0].status).toBe("skip");
       expect(p2.files[1].status).toBe("write");
@@ -285,11 +292,11 @@ describe("plan", () => {
     const tmpDir = mkdtempSync(join(tmpdir(), "ts-treegen-"));
     try {
       const files = await emit(file("test.txt", "first"));
-      const p1 = await plan(files, { targetDir: tmpDir });
+      const p1 = await plan(files, { targetDir: tmpDir, fs: nodeFs });
       await p1.run();
 
       const files2 = await emit(file("test.txt", "second"));
-      const p2 = await plan(files2, { targetDir: tmpDir });
+      const p2 = await plan(files2, { targetDir: tmpDir, fs: nodeFs });
       expect(p2.files[0].status).toBe("write");
       await p2.run();
 

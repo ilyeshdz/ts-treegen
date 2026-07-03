@@ -4,6 +4,8 @@ export default defineConfig({
   dts: {
     tsgo: true,
   },
-  exports: true,
-  // ...config options
+  entry: {
+    index: "src/index.ts",
+    node: "src/node.ts",
+  },
 });

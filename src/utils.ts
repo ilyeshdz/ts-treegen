@@ -1,35 +1,47 @@
-import { normalize, resolve } from "node:path";
+function normalizePath(p: string): string {
+  const parts = p.split("/");
+  const result: string[] = [];
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    if (part === "" || part === ".") continue;
+    if (part === "..") {
+      if (result.length > 0 && result[result.length - 1] !== "..") {
+        result.pop();
+      } else {
+        result.push("..");
+      }
+    } else {
+      result.push(part);
+    }
+  }
+  return result.join("/") || ".";
+}
 
-/**
- * Resolve and validate a path segment against a base path.
- *
- * Guards against:
- * - Absolute path segments (e.g. `"/etc/passwd"`).
- * - Directory traversal (e.g. `"../../etc"`).
- * - Escaping the base boundary via symlink-like resolution tricks.
- *
- * @param basePath – Normalised parent path (may be empty).
- * @param segment – Child path segment to resolve.
- * @returns Normalised combined path.
- */
+export function dirname(p: string): string {
+  const i = p.lastIndexOf("/");
+  if (i === -1) return ".";
+  if (i === 0) return "/";
+  return p.slice(0, i);
+}
+
+export function join(...parts: string[]): string {
+  return parts.filter(Boolean).join("/");
+}
+
 export function sanitizePath(basePath: string, segment: string): string {
   if (segment.startsWith("/") || /^[A-Za-z]:[/\\]/.test(segment) || segment.startsWith("\\\\")) {
     throw new Error(`Directory traversal or absolute path violation: ${segment}`);
   }
 
-  const combined = normalize(basePath ? `${basePath}/${segment}` : segment);
+  const combined = normalizePath(basePath ? `${basePath}/${segment}` : segment);
 
   if (combined === ".." || combined.startsWith("../")) {
     throw new Error(`Directory traversal or absolute path violation: ${segment}`);
   }
 
-  // Root boundary ("") resolves to "/" so every path is within it, so skip.
   if (basePath) {
-    const baseNormalized = normalize(basePath);
-    const resolvedBase = resolve("/", baseNormalized);
-    const resolvedCombined = resolve("/", combined);
-
-    if (!resolvedCombined.startsWith(resolvedBase + "/") && resolvedCombined !== resolvedBase) {
+    const baseNormalized = normalizePath(basePath);
+    if (!combined.startsWith(baseNormalized + "/") && combined !== baseNormalized) {
       throw new Error(`Directory traversal or absolute path violation: ${segment}`);
     }
   }

@@ -1,6 +1,5 @@
-import { dirname, join } from "node:path";
-import type { VirtualFile } from "./protocol.js";
-import { access, mkdir, writeFile } from "node:fs/promises";
+import { dirname, join } from "./utils.js";
+import type { VirtualFile, FileSystem } from "./protocol.js";
 
 const MAX_CONCURRENCY = 50;
 
@@ -20,57 +19,52 @@ async function runConcurrently<T>(
 
 /** A resolved file in the plan, with its absolute path and status. */
 export interface PlanFile {
-  /** Relative path as defined in the virtual file. */
   path: string;
-  /** Absolute path resolved against the target directory. */
   absolutePath: string;
-  /** The content to write. */
   content: string | Uint8Array;
-  /**
-   * Execution outcome.
-   * - `"write"` — file will be written to disk.
-   * - `"skip"` — file exists on disk and `overwrite` is `false`, so it will be left untouched.
-   */
   status: "write" | "skip";
 }
 
 /** A deferred write plan returned by {@link plan}. */
 export interface Plan {
-  /** Files to process, each tagged with its resolved path and execution status. */
   files: PlanFile[];
   /**
-   * Execute the plan.
-   * Creates parent directories as needed and writes files with
-   * status `"write"` to disk.
+   * Execute the plan. Requires a {@link FileSystem} if one was not
+   * provided to {@link plan} via `PlanOptions.fs`.
    */
-  run(): Promise<void>;
+  run(fs?: FileSystem): Promise<void>;
 }
 
 /** Options for {@link plan}. */
 export interface PlanOptions {
-  /** Base output directory. Defaults to `process.cwd()`. */
+  /** Base output directory. Required unless `fs.cwd()` is provided. */
   targetDir?: string;
   /**
-   * Whether to overwrite existing files.
-   * When `false`, existing files are silently skipped.
+   * When `false` and a `FileSystem` is available at plan-time,
+   * existing files are silently skipped.
    * @default true
    */
   overwrite?: boolean;
+  /** A {@link FileSystem} implementation for I/O operations. */
+  fs?: FileSystem;
 }
 
 /**
- * Create a deferred write plan for a set of virtual files.
+ * Create a deferred write plan.
  *
- * The returned {@link Plan} contains the resolved file metadata and
- * computes each file's execution status (`"write"` or `"skip"`)
- * based on the current disk state and the provided options.
- * Call `.run()` to persist the files to disk.
+ * Provide a {@link FileSystem} via `options.fs` or pass one to
+ * {@link Plan.run} when you're ready to write. At least a
+ * `targetDir` or a filesystem with `cwd()` is required.
  *
  * @param files – Array of virtual files to write (typically from {@link emit}).
  * @param options – Plan options.
  */
 export async function plan(files: VirtualFile[], options: PlanOptions = {}): Promise<Plan> {
-  const base = options.targetDir || process.cwd();
+  const io = options.fs;
+  const base = options.targetDir ?? io?.cwd();
+  if (!base) {
+    throw new Error("Provide targetDir or a FileSystem with cwd() to plan writes.");
+  }
 
   const dirs = new Set<string>();
   const planFiles: PlanFile[] = [];
@@ -86,11 +80,11 @@ export async function plan(files: VirtualFile[], options: PlanOptions = {}): Pro
     });
   }
 
-  if (options.overwrite === false) {
+  if (options.overwrite === false && io) {
     await Promise.all(
       planFiles.map(async (f) => {
         try {
-          await access(f.absolutePath);
+          await io.access(f.absolutePath);
           f.status = "skip";
         } catch {
           // file doesn't exist — keep as "write"
@@ -102,13 +96,22 @@ export async function plan(files: VirtualFile[], options: PlanOptions = {}): Pro
   return {
     files: planFiles,
 
-    async run() {
-      await Promise.all(Array.from(dirs, (d) => mkdir(d, { recursive: true })));
+    async run(runFs?: FileSystem) {
+      const activeFs = runFs ?? io;
+      if (!activeFs) {
+        throw new Error("No FileSystem provided. Pass `fs` to plan() or run().");
+      }
+
+      await Promise.all(Array.from(dirs, (d) => activeFs.mkdir(d, { recursive: true })));
 
       const toWrite = planFiles.filter((f) => f.status === "write");
       if (toWrite.length === 0) return;
 
-      await runConcurrently(toWrite, (f) => writeFile(f.absolutePath, f.content), MAX_CONCURRENCY);
+      await runConcurrently(
+        toWrite,
+        (f) => activeFs.writeFile(f.absolutePath, f.content),
+        MAX_CONCURRENCY,
+      );
     },
   };
 }
