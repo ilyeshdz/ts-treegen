@@ -10,6 +10,7 @@ describe("MemoryFileSystem", () => {
 
   it("should write and snapshot files", async () => {
     const fs = createMemoryFs();
+    await fs.mkdir("/a/b", { recursive: true });
     await fs.writeFile("/a/b/c.txt", "hello");
     expect(fs.snapshot()).toEqual({ "/a/b/c.txt": "hello" });
   });
@@ -32,7 +33,7 @@ describe("MemoryFileSystem", () => {
     await expect(fs.access("/nope.txt")).rejects.toThrow("ENOENT");
   });
 
-  it("mkdir should be a no-op", async () => {
+  it("mkdir should track directories", async () => {
     const fs = createMemoryFs();
     await expect(fs.mkdir("/any/dir", { recursive: true })).resolves.toBeUndefined();
   });
