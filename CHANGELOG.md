@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.0.0](https://github.com/ilyeshdz/ts-treegen/compare/0.4.0...1.0.0) (2026-07-03)
+
+### ⚠ BREAKING CHANGES
+
+* FileSystem.access(path) is now FileSystem.exists(path)
+and returns Promise<boolean> instead of throwing on missing files.
+This is a clearer name for the operation (existence check, not
+permission check) and the boolean return type eliminates the need
+for try-catch in overwrite logic.
+
+Updated all implementations: node, deno, bun, cloudflare, and memory.
+
+### Features
+
+* add Cloudflare Workers FileSystem implementation ([dfe7c2e](https://github.com/ilyeshdz/ts-treegen/commit/dfe7c2eb9fee1dc242e1df04167b8aa12ae9452d))
+* add deno, bun, memory, and cloudflare subpath modules ([83a24f3](https://github.com/ilyeshdz/ts-treegen/commit/83a24f3ea734287d7fee839943b30392b1ad40e7))
+* rename FileSystem.access() to FileSystem.exists() ([b27cb5d](https://github.com/ilyeshdz/ts-treegen/commit/b27cb5d538591f47e398b53f1a906f461398d385))
+* runtime-agnostic core with FileSystem interface ([d13c949](https://github.com/ilyeshdz/ts-treegen/commit/d13c949581e9eb6536b0fa8476c08f4e93ceb81a))
+
+### Bug Fixes
+
+* make MemoryFileSystem.mkdir track directories and validate parent ([29112fb](https://github.com/ilyeshdz/ts-treegen/commit/29112fbbfe24e101f95b293b2fe34d4de325201b))
+* only swallow ENOENT/ENOTDIR in overwrite check, rethrow others ([071bc68](https://github.com/ilyeshdz/ts-treegen/commit/071bc684c4dda03c29375e09e737770538cfa6c1))
+* prevent unhandled promise rejections in runConcurrently ([69b3611](https://github.com/ilyeshdz/ts-treegen/commit/69b3611a24aba546a16fcc28bc7249e56c6ecddf))
+* use pnpm instead of npm in pre-commit hook ([c9b12c4](https://github.com/ilyeshdz/ts-treegen/commit/c9b12c4a0ac388c651a5e09035012963d4296d9e))
+
+### Documentation
+
+* clarify conventional commit style (no scope) ([aec8054](https://github.com/ilyeshdz/ts-treegen/commit/aec8054c6e68e35649da2a071d5119e1c5b75003))
+
 ## [0.4.0](https://github.com/ilyeshdz/ts-treegen/compare/0.3.3...0.4.0) (2026-07-03)
 
 ### Features
