@@ -76,4 +76,4 @@ export { file, dir, link } from "./primitives.js";
 export { emit } from "./engine.js";
 export { plan } from "./plan.js";
 export type { PlateNode, VirtualFile, FileContent, FileOptions } from "./protocol.js";
-export type { Plan, PlanFile, PlanOptions } from "./plan.js";
+export type { Plan, PlanFile, PlanOptions, ConflictStrategy } from "./plan.js";

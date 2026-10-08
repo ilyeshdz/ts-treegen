@@ -51,6 +51,16 @@ export interface Plan {
   run(fs?: FileSystem): Promise<void>;
 }
 
+/**
+ * Strategy applied when several entries resolve to the same path.
+ *
+ * - `"last"` (default) keeps the last entry — deterministic, supports
+ *   base-tree + overrides composition.
+ * - `"first"` keeps the first entry and drops later ones.
+ * - `"error"` throws listing every duplicated path.
+ */
+export type ConflictStrategy = "error" | "first" | "last";
+
 /** Options for {@link plan}. */
 export interface PlanOptions {
   /** Base output directory. Required unless `fs.cwd()` is provided. */
@@ -63,6 +73,42 @@ export interface PlanOptions {
   overwrite?: boolean;
   /** A {@link FileSystem} implementation for I/O operations. */
   fs?: FileSystem;
+  /**
+   * How to resolve entries sharing the same path.
+   * @default "last"
+   */
+  onConflict?: ConflictStrategy;
+}
+
+function resolveConflicts(entries: PlanFile[], strategy: ConflictStrategy): PlanFile[] {
+  if (strategy === "error") {
+    const seen = new Set<string>();
+    const dupes = new Set<string>();
+    for (let i = 0; i < entries.length; i++) {
+      if (seen.has(entries[i].path)) {
+        dupes.add(entries[i].path);
+      } else {
+        seen.add(entries[i].path);
+      }
+    }
+    if (dupes.size > 0) {
+      throw new Error(`Duplicate paths in plan: ${Array.from(dupes).join(", ")}`);
+    }
+    return entries;
+  }
+
+  const deduped: PlanFile[] = [];
+  const indexByPath = new Map<string, number>();
+  for (let i = 0; i < entries.length; i++) {
+    const existing = indexByPath.get(entries[i].path);
+    if (existing === undefined) {
+      indexByPath.set(entries[i].path, deduped.length);
+      deduped.push(entries[i]);
+    } else if (strategy === "last") {
+      deduped[existing] = entries[i];
+    }
+  }
+  return deduped;
 }
 
 /**
@@ -83,7 +129,7 @@ export async function plan(files: VirtualFile[], options: PlanOptions = {}): Pro
   }
 
   const dirs = new Set<string>();
-  const planFiles: PlanFile[] = [];
+  let planFiles: PlanFile[] = [];
 
   for (let i = 0; i < files.length; i++) {
     const abs = join(base, files[i].path);
@@ -102,6 +148,8 @@ export async function plan(files: VirtualFile[], options: PlanOptions = {}): Pro
     }
     planFiles.push(entry);
   }
+
+  planFiles = resolveConflicts(planFiles, options.onConflict ?? "last");
 
   if (options.overwrite === false && io) {
     await Promise.all(

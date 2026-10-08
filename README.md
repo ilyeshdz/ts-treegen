@@ -91,6 +91,17 @@ option on `file()` applies chmod bits after writing. Custom
 `chmod()` methods when plans actually use them; otherwise `run()`
 fails fast with a clear error.
 
+### Handling duplicate paths
+
+When several entries resolve to the same path, `plan()` applies the
+`onConflict` strategy: `"last"` (default, keeps the last entry —
+handy for base-tree + overrides composition), `"first"`, or
+`"error"` which throws listing every duplicated path.
+
+```ts
+const p = await plan(files, { targetDir: "./output", onConflict: "error" });
+```
+
 ### Browser / Deno / Bun
 
 Pass a custom `FileSystem` to `plan()` via the core import. The interface has only four methods, making it trivial to implement for any environment.
