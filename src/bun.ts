@@ -4,15 +4,15 @@ declare var Bun: {
 };
 
 export { PLATE_SYMBOL } from "./protocol.js";
-export { file, dir } from "./primitives.js";
+export { file, dir, link } from "./primitives.js";
 export { emit } from "./engine.js";
-export type { PlateNode, VirtualFile, FileContent, FileSystem } from "./protocol.js";
+export type { PlateNode, VirtualFile, FileContent, FileOptions, FileSystem } from "./protocol.js";
 export type { Plan, PlanFile, PlanOptions } from "./plan.js";
 
 import { plan as planCore } from "./plan.js";
 import type { VirtualFile, FileSystem } from "./protocol.js";
 import type { Plan, PlanOptions } from "./plan.js";
-import { mkdir } from "node:fs/promises";
+import { mkdir, symlink, chmod } from "node:fs/promises";
 
 const bunFs: FileSystem = {
   cwd: () => process.cwd(),
@@ -21,6 +21,8 @@ const bunFs: FileSystem = {
     mkdir(path, { recursive: opts.recursive }).then(() => {}),
   writeFile: (path: string, content: string | Uint8Array) =>
     Bun.write(path, content).then(() => {}),
+  symlink: (target: string, path: string) => symlink(target, path).then(() => {}),
+  chmod: (path: string, mode: number) => chmod(path, mode).then(() => {}),
 };
 
 export async function plan(files: VirtualFile[], options: PlanOptions = {}): Promise<Plan> {

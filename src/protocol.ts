@@ -4,6 +4,16 @@ export interface FileSystem {
   exists(path: string): Promise<boolean>;
   mkdir(path: string, options: { recursive: boolean }): Promise<void>;
   writeFile(path: string, content: string | Uint8Array): Promise<void>;
+  /**
+   * Create a symbolic link. Optional — only required when the plan
+   * contains {@link link} entries. Missing support fails fast at run-time.
+   */
+  symlink?(target: string, path: string): Promise<void>;
+  /**
+   * Change file mode bits. Optional — only required when the plan
+   * contains files with a `mode`. Missing support fails fast at run-time.
+   */
+  chmod?(path: string, mode: number): Promise<void>;
 }
 
 /** Internal brand symbol used to identify PlateNodes at runtime. */
@@ -13,8 +23,27 @@ export const PLATE_SYMBOL = Symbol.for("ts-plate.node");
 export interface VirtualFile {
   /** Relative path from the target directory. */
   path: string;
-  /** String or binary content. */
+  /** String or binary content. Ignored when `symlink` is set. */
   content: string | Uint8Array;
+  /**
+   * Symlink target. When set, the entry is created as a symbolic link
+   * instead of a regular file.
+   */
+  symlink?: string;
+  /**
+   * File mode bits (e.g. `0o755`). Applied with chmod after writing.
+   * Only set via the `file()` options.
+   */
+  mode?: number;
+}
+
+/** Options for {@link file}. */
+export interface FileOptions {
+  /**
+   * File mode bits (e.g. `0o755` for executables).
+   * Requires the `FileSystem` to implement `chmod()`.
+   */
+  mode?: number;
 }
 
 /**

@@ -6,6 +6,7 @@ describe("ts-treegen/deno module structure", () => {
     expect(mod.PLATE_SYMBOL).toBeDefined();
     expect(mod.file).toBeDefined();
     expect(mod.dir).toBeDefined();
+    expect(mod.link).toBeDefined();
     expect(mod.emit).toBeDefined();
     expect(mod.plan).toBeDefined();
   });
@@ -17,6 +18,7 @@ describe("ts-treegen/bun module structure", () => {
     expect(mod.PLATE_SYMBOL).toBeDefined();
     expect(mod.file).toBeDefined();
     expect(mod.dir).toBeDefined();
+    expect(mod.link).toBeDefined();
     expect(mod.emit).toBeDefined();
     expect(mod.plan).toBeDefined();
   });
@@ -28,6 +30,7 @@ describe("ts-treegen/cloudflare module structure", () => {
     expect(mod.PLATE_SYMBOL).toBeDefined();
     expect(mod.file).toBeDefined();
     expect(mod.dir).toBeDefined();
+    expect(mod.link).toBeDefined();
     expect(mod.emit).toBeDefined();
     expect(mod.plan).toBeDefined();
     expect(mod.createMemoryFs).toBeDefined();

@@ -71,6 +71,26 @@ const p = await plan(files, { targetDir: "./output" });
 await p.run();
 ```
 
+### Symlinks and executable files
+
+```ts
+import { file, link, emit, plan } from "ts-treegen/node";
+
+const files = await emit(
+  file("bin/run.sh", "#!/bin/sh\necho hi", { mode: 0o755 }),
+  link("latest", "bin/run.sh"),
+);
+
+await plan(files, { targetDir: "./output" }).then((p) => p.run());
+```
+
+`link()` creates a symbolic link (only the link location is
+path-checked — the target may point outside the tree). The `mode`
+option on `file()` applies chmod bits after writing. Custom
+`FileSystem` implementations only need the optional `symlink()` /
+`chmod()` methods when plans actually use them; otherwise `run()`
+fails fast with a clear error.
+
 ### Browser / Deno / Bun
 
 Pass a custom `FileSystem` to `plan()` via the core import. The interface has only four methods, making it trivial to implement for any environment.

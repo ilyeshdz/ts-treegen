@@ -1,13 +1,13 @@
 export { PLATE_SYMBOL } from "./protocol.js";
-export { file, dir } from "./primitives.js";
+export { file, dir, link } from "./primitives.js";
 export { emit } from "./engine.js";
-export type { PlateNode, VirtualFile, FileContent, FileSystem } from "./protocol.js";
+export type { PlateNode, VirtualFile, FileContent, FileOptions, FileSystem } from "./protocol.js";
 export type { Plan, PlanFile, PlanOptions } from "./plan.js";
 
 import { plan as planCore } from "./plan.js";
 import type { VirtualFile, FileSystem } from "./protocol.js";
 import type { Plan, PlanOptions } from "./plan.js";
-import { access, mkdir, writeFile } from "node:fs/promises";
+import { access, mkdir, writeFile, symlink, chmod } from "node:fs/promises";
 import { cwd } from "node:process";
 
 const nodeFs: FileSystem = {
@@ -22,6 +22,8 @@ const nodeFs: FileSystem = {
   },
   mkdir: (p, o) => mkdir(p, o).then(() => {}),
   writeFile,
+  symlink: (target, path) => symlink(target, path).then(() => {}),
+  chmod: (p, mode) => chmod(p, mode).then(() => {}),
 };
 
 export async function plan(files: VirtualFile[], options: PlanOptions = {}): Promise<Plan> {

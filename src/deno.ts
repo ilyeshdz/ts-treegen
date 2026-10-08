@@ -3,12 +3,14 @@ declare var Deno: {
   stat(path: string): Promise<{ isFile: boolean; isDirectory: boolean }>;
   mkdir(path: string, options?: { recursive?: boolean }): Promise<void>;
   writeFile(path: string, data: Uint8Array): Promise<void>;
+  symlink(target: string, path: string): Promise<void>;
+  chmod(path: string, mode: number): Promise<void>;
 };
 
 export { PLATE_SYMBOL } from "./protocol.js";
-export { file, dir } from "./primitives.js";
+export { file, dir, link } from "./primitives.js";
 export { emit } from "./engine.js";
-export type { PlateNode, VirtualFile, FileContent, FileSystem } from "./protocol.js";
+export type { PlateNode, VirtualFile, FileContent, FileOptions, FileSystem } from "./protocol.js";
 export type { Plan, PlanFile, PlanOptions } from "./plan.js";
 
 import { plan as planCore } from "./plan.js";
@@ -29,6 +31,8 @@ const denoFs: FileSystem = {
     Deno.mkdir(path, { recursive: opts.recursive }),
   writeFile: (path: string, content: string | Uint8Array) =>
     Deno.writeFile(path, typeof content === "string" ? new TextEncoder().encode(content) : content),
+  symlink: (target: string, path: string) => Deno.symlink(target, path),
+  chmod: (path: string, mode: number) => Deno.chmod(path, mode),
 };
 
 export async function plan(files: VirtualFile[], options: PlanOptions = {}): Promise<Plan> {

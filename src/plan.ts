@@ -35,6 +35,10 @@ export interface PlanFile {
   absolutePath: string;
   content: string | Uint8Array;
   status: "write" | "skip";
+  /** Symlink target. When set, the entry is created as a symbolic link. */
+  symlink?: string;
+  /** File mode bits (e.g. `0o755`). Applied with chmod after writing. */
+  mode?: number;
 }
 
 /** A deferred write plan returned by {@link plan}. */
@@ -84,12 +88,19 @@ export async function plan(files: VirtualFile[], options: PlanOptions = {}): Pro
   for (let i = 0; i < files.length; i++) {
     const abs = join(base, files[i].path);
     dirs.add(dirname(abs));
-    planFiles.push({
+    const entry: PlanFile = {
       path: files[i].path,
       absolutePath: abs,
       content: files[i].content,
       status: "write",
-    });
+    };
+    if (files[i].symlink !== undefined) {
+      entry.symlink = files[i].symlink;
+    }
+    if (files[i].mode !== undefined) {
+      entry.mode = files[i].mode;
+    }
+    planFiles.push(entry);
   }
 
   if (options.overwrite === false && io) {
@@ -111,14 +122,51 @@ export async function plan(files: VirtualFile[], options: PlanOptions = {}): Pro
         throw new Error("No FileSystem provided. Pass `fs` to plan() or run().");
       }
 
+      const pending = planFiles.filter((f) => f.status === "write");
+      let needsSymlink = false;
+      let needsChmod = false;
+      for (let i = 0; i < pending.length; i++) {
+        if (pending[i].symlink !== undefined) needsSymlink = true;
+        if (pending[i].mode !== undefined) needsChmod = true;
+      }
+      const symlinkFn = activeFs.symlink;
+      const chmodFn = activeFs.chmod;
+      if (needsSymlink && !symlinkFn) {
+        throw new Error("Plan contains symlinks but the FileSystem does not implement symlink().");
+      }
+      if (needsChmod && !chmodFn) {
+        throw new Error("Plan contains file modes but the FileSystem does not implement chmod().");
+      }
+
       await Promise.all(Array.from(dirs, (d) => activeFs.mkdir(d, { recursive: true })));
 
-      const toWrite = planFiles.filter((f) => f.status === "write");
-      if (toWrite.length === 0) return;
+      const regular: PlanFile[] = [];
+      const links: PlanFile[] = [];
+      for (let i = 0; i < pending.length; i++) {
+        if (pending[i].symlink === undefined) {
+          regular.push(pending[i]);
+        } else {
+          links.push(pending[i]);
+        }
+      }
 
       await runConcurrently(
-        toWrite,
-        (f) => activeFs.writeFile(f.absolutePath, f.content),
+        regular,
+        async (f) => {
+          await activeFs.writeFile(f.absolutePath, f.content);
+          if (f.mode === undefined || !chmodFn) return;
+          await chmodFn(f.absolutePath, f.mode);
+        },
+        MAX_CONCURRENCY,
+      );
+
+      if (links.length === 0) return;
+      await runConcurrently(
+        links,
+        async (f) => {
+          if (!symlinkFn || f.symlink === undefined) return;
+          await symlinkFn(f.symlink, f.absolutePath);
+        },
         MAX_CONCURRENCY,
       );
     },

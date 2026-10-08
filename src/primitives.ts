@@ -1,4 +1,10 @@
-import { PLATE_SYMBOL, type PlateNode, type VirtualFile, type FileContent } from "./protocol.js";
+import {
+  PLATE_SYMBOL,
+  type PlateNode,
+  type VirtualFile,
+  type FileContent,
+  type FileOptions,
+} from "./protocol.js";
 import { sanitizePath } from "./utils.js";
 
 /**
@@ -11,8 +17,9 @@ import { sanitizePath } from "./utils.js";
  *
  * @param name – Relative file path (e.g. `"src/index.ts"`).
  * @param content – Optional content (see {@link FileContent}).
+ * @param options – Optional settings (e.g. `{ mode: 0o755 }` for executables).
  */
-export function file(name: string, content?: FileContent): PlateNode {
+export function file(name: string, content?: FileContent, options?: FileOptions): PlateNode {
   return {
     [PLATE_SYMBOL]: true,
     async generate(currentPath) {
@@ -30,7 +37,31 @@ export function file(name: string, content?: FileContent): PlateNode {
         finalContent = JSON.stringify(evaluated, null, 2);
       }
 
-      return [{ path: resolvedPath, content: finalContent }];
+      const entry: VirtualFile = { path: resolvedPath, content: finalContent };
+      if (options?.mode !== undefined) {
+        entry.mode = options.mode;
+      }
+      return [entry];
+    },
+  };
+}
+
+/**
+ * Create a virtual symbolic link node.
+ *
+ * Only the link location is validated — the target is stored verbatim
+ * and may be relative (e.g. `"../shared/util.sh"`) or absolute,
+ * since pointing outside the tree is the purpose of a symlink.
+ *
+ * @param name – Relative link path (e.g. `"bin/tool"`).
+ * @param target – Link target as it will appear on disk.
+ */
+export function link(name: string, target: string): PlateNode {
+  return {
+    [PLATE_SYMBOL]: true,
+    async generate(currentPath) {
+      const resolvedPath = sanitizePath(currentPath, name);
+      return [{ path: resolvedPath, content: "", symlink: target }];
     },
   };
 }

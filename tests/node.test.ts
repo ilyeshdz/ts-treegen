@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { file, dir, emit, plan } from "../src/node.js";
-import { mkdtempSync, existsSync, readFileSync } from "fs";
+import { file, dir, link, emit, plan } from "../src/node.js";
+import { mkdtempSync, existsSync, readFileSync, readlinkSync, statSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 import { rm } from "fs/promises";
@@ -45,6 +45,22 @@ describe("ts-treegen/node", () => {
 
       expect(readFileSync(join(tmpDir, "keep.txt"), "utf-8")).toBe("original");
       expect(existsSync(join(tmpDir, "also-new.txt"))).toBe(true);
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("should create symlinks and apply modes on disk", async () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), "ts-treegen-node-"));
+    try {
+      const files = await emit(
+        file("bin/run.sh", "#!/bin/sh\necho hi", { mode: 0o755 }),
+        link("latest", "bin/run.sh"),
+      );
+      await plan(files, { targetDir: tmpDir }).then((p) => p.run());
+
+      expect(readlinkSync(join(tmpDir, "latest"))).toBe("bin/run.sh");
+      expect(statSync(join(tmpDir, "bin/run.sh")).mode & 0o777).toBe(0o755);
     } finally {
       await rm(tmpDir, { recursive: true, force: true });
     }
