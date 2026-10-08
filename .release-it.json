@@ -18,12 +18,12 @@
         "types": [
           { "type": "feat", "section": "Features" },
           { "type": "fix", "section": "Bug Fixes" },
-          { "type": "chore", "hidden": true },
+          { "type": "chore", "effect": "hidden" },
           { "type": "docs", "section": "Documentation" },
-          { "type": "style", "hidden": true },
-          { "type": "refactor", "hidden": true },
+          { "type": "style", "effect": "hidden" },
+          { "type": "refactor", "effect": "hidden" },
           { "type": "perf", "section": "Performance" },
-          { "type": "test", "hidden": true }
+          { "type": "test", "effect": "hidden" }
         ]
       },
       "infile": "CHANGELOG.md"
