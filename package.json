@@ -44,7 +44,7 @@
     "@types/node": "^26.6.4",
     "@typescript/native-preview": "7.0.0-dev.20260509.2",
     "husky": "^9.1.7",
-    "oxfmt": "^0.56.0",
+    "oxfmt": "^0.72.0",
     "oxlint": "^1.87.0",
     "release-it": "^20.2.1",
     "tsdown": "^0.22.14",
