@@ -47,7 +47,7 @@
     "oxfmt": "^0.72.0",
     "oxlint": "^1.87.0",
     "release-it": "^20.2.1",
-    "tsdown": "^0.22.14",
+    "tsdown": "^0.23.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.11"
   },
