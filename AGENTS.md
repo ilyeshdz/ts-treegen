@@ -2,17 +2,18 @@
 
 ## Commands (run from root)
 
-| Command          | What                                           |
-| ---------------- | ---------------------------------------------- |
-| `pnpm build`     | Bundle with tsdown                             |
-| `pnpm dev`       | tsdown --watch                                 |
-| `pnpm test`      | Vitest (all tests in `tests/`)                 |
-| `pnpm typecheck` | `tsc --noEmit`                                 |
-| `pnpm lint`      | oxlint                                         |
-| `pnpm lint:fix`  | oxlint --fix                                   |
-| `pnpm fmt`       | oxfmt                                          |
-| `pnpm fmt:check` | oxfmt --check                                  |
-| `pnpm release`   | release-it (bumps, tags, publishes, changelog) |
+| Command           | What                                           |
+| ----------------- | ---------------------------------------------- |
+| `pnpm build`      | Bundle with tsdown                             |
+| `pnpm dev`        | tsdown --watch                                 |
+| `pnpm test`       | Vitest in run mode (all tests in `tests/`)     |
+| `pnpm test:watch` | Vitest in watch mode for local development     |
+| `pnpm typecheck`  | `tsc --noEmit`                                 |
+| `pnpm lint`       | oxlint                                         |
+| `pnpm lint:fix`   | oxlint --fix                                   |
+| `pnpm fmt`        | oxfmt                                          |
+| `pnpm fmt:check`  | oxfmt --check                                  |
+| `pnpm release`    | release-it (bumps, tags, publishes, changelog) |
 
 Pre-commit runs: `fmt && lint:fix && test`.
 
@@ -22,8 +23,8 @@ Pre-commit runs: `fmt && lint:fix && test`.
 - **oxlint** + **oxfmt** instead of ESLint/Prettier. Config: `.oxlintrc.json`, `.oxfmtrc.json`.
 - **tsdown** for bundling (not tsc). `tsconfig.json` only emits declarations (`emitDeclarationOnly: true`).
 - TypeScript `module: "preserve"` + `verbatimModuleSyntax` — source uses `.js` extensions in imports (e.g. `./protocol.js`). Tests import from `../src/index.js`, not `.ts`.
-- **vitest** (no jest). Single test file: `tests/index.test.ts`.
-- No CI workflows configured.
+- **vitest** (no jest). Test files: `tests/index.test.ts`, `tests/memory.test.ts`, `tests/node.test.ts`, `tests/runtimes.test.ts`.
+- CI workflows in `.github/workflows/`: `ci.yml` (fmt, lint, typecheck, test, build), `release.yml` (manual release-it), `nightly.yml` (scheduled nightly release).
 
 ## Architecture
 
