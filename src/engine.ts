@@ -2,13 +2,8 @@ import { dir } from "./primitives.js";
 import type { PlateNode, VirtualFile } from "./protocol.js";
 
 /**
- * Compile a list of nodes into a flat array of {@link VirtualFile} objects.
- *
- * All paths are validated and normalised before any result is yielded.
- * Throws on directory-traversal or absolute-path escape attempts.
- *
- * @param nodes – One or more {@link PlateNode}s (e.g. from {@link file} / {@link dir}).
- * @returns Flat array of resolved virtual files.
+ * Compile nodes into a flat array of {@link VirtualFile}. Paths are
+ * validated first — traversal or absolute-path escapes throw.
  */
 export async function emit(...nodes: PlateNode[]): Promise<VirtualFile[]> {
   if (nodes.length === 0) return [];

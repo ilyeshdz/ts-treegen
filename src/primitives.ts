@@ -8,16 +8,11 @@ import {
 import { sanitizePath } from "./utils.js";
 
 /**
- * Create a virtual file node.
+ * Create a virtual file node. Objects are serialised to pretty-printed
+ * JSON, factories are evaluated once per run, `null` / `undefined`
+ * becomes an empty string.
  *
- * The `content` parameter is optional — when omitted the resolved file will
- * have an empty string as its content. Plain objects are automatically
- * serialised to pretty-printed JSON. Pass a factory function for lazy
- * evaluation (it is called once per generation run).
- *
- * @param name – Relative file path (e.g. `"src/index.ts"`).
- * @param content – Optional content (see {@link FileContent}).
- * @param options – Optional settings (e.g. `{ mode: 0o755 }` for executables).
+ * @param name Relative file path (e.g. `"src/index.ts"`).
  */
 export function file(name: string, content?: FileContent, options?: FileOptions): PlateNode {
   return {
@@ -47,14 +42,10 @@ export function file(name: string, content?: FileContent, options?: FileOptions)
 }
 
 /**
- * Create a virtual symbolic link node.
+ * Create a virtual symbolic link node. The target is stored verbatim and
+ * may point outside the tree — only the link location is validated.
  *
- * Only the link location is validated — the target is stored verbatim
- * and may be relative (e.g. `"../shared/util.sh"`) or absolute,
- * since pointing outside the tree is the purpose of a symlink.
- *
- * @param name – Relative link path (e.g. `"bin/tool"`).
- * @param target – Link target as it will appear on disk.
+ * @param name Relative link path (e.g. `"bin/tool"`).
  */
 export function link(name: string, target: string): PlateNode {
   return {
@@ -67,17 +58,12 @@ export function link(name: string, target: string): PlateNode {
 }
 
 /**
- * Create a virtual directory node.
+ * Create a virtual directory node. Arrays are deeply flattened and falsy
+ * children dropped, so `isProd && file(...)` works inline. `""` as name
+ * creates a transparent root boundary.
  *
- * Deeply flattens arrays and automatically filters out falsy values,
- * so native JS expressions like `isProd && file(...)` work naturally.
- * Passing an empty string `""` as the name creates a root boundary
- * (useful for merging multiple top-level trees without an extra folder).
- *
- * @param name – Directory name, or `""` for a transparent root boundary.
- * @param children – Nested {@link PlateNode}s, arrays thereof, or falsy values.
+ * @param name Directory name, or `""` for a root boundary.
  */
-
 function flattenIfNested(arr: unknown[]): unknown[] {
   return arr.some(Array.isArray) ? arr.flat(Infinity) : arr;
 }

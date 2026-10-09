@@ -34,7 +34,6 @@ describe("ts-treegen/cloudflare module structure", () => {
     expect(mod.emit).toBeDefined();
     expect(mod.plan).toBeDefined();
     expect(mod.createMemoryFs).toBeDefined();
-    // WorkersFileSystem is a type-only export, not a value
   });
 
   it("should create a memory fs from cloudflare subpath", async () => {

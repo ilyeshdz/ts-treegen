@@ -1,4 +1,3 @@
-/** Runtime-agnostic filesystem interface for the write plan. */
 export interface FileSystem {
   cwd(): string;
   exists(path: string): Promise<boolean>;
@@ -16,55 +15,35 @@ export interface FileSystem {
   chmod?(path: string, mode: number): Promise<void>;
 }
 
-/** Internal brand symbol used to identify PlateNodes at runtime. */
 export const PLATE_SYMBOL = Symbol.for("ts-plate.node");
 
-/** A resolved file ready for disk serialization. */
 export interface VirtualFile {
   /** Relative path from the target directory. */
   path: string;
-  /** String or binary content. Ignored when `symlink` is set. */
+  /** Ignored when `symlink` is set. */
   content: string | Uint8Array;
-  /**
-   * Symlink target. When set, the entry is created as a symbolic link
-   * instead of a regular file.
-   */
+  /** Symlink target. When set, the entry is a symbolic link. */
   symlink?: string;
-  /**
-   * File mode bits (e.g. `0o755`). Applied with chmod after writing.
-   * Only set via the `file()` options.
-   */
+  /** Mode bits, applied with chmod after writing. */
   mode?: number;
 }
 
-/** Options for {@link file}. */
 export interface FileOptions {
-  /**
-   * File mode bits (e.g. `0o755` for executables).
-   * Requires the `FileSystem` to implement `chmod()`.
-   */
+  /** Mode bits. Requires a `FileSystem` with `chmod()`. */
   mode?: number;
 }
 
 /**
- * Union of accepted content types for {@link file}.
- *
- * - `string` / `Uint8Array` – literal content.
- * - `Record<string, unknown>` – serialised to pretty-printed JSON.
- * - `() => FileContentValue | Promise<FileContentValue>` – lazy factory evaluated once per generation.
- *   `null` / `undefined` results are coerced to an empty string.
+ * Accepted content types for {@link file}: literals, objects (serialised
+ * to pretty-printed JSON), or lazy factories. `null` / `undefined`
+ * results are coerced to an empty string.
  */
 type FileContentValue = string | Uint8Array | Record<string, unknown> | null | undefined;
 
 export type FileContent = FileContentValue | (() => FileContentValue | Promise<FileContentValue>);
 
-/** A node in a virtual file-tree that can produce one or more {@link VirtualFile} entries. */
 export interface PlateNode {
   [PLATE_SYMBOL]: true;
-  /**
-   * Returns all {@link VirtualFile} entries reachable from this node given
-   * the accumulated path prefix so far.
-   * @param currentPath – Normalised path inherited from ancestor directories.
-   */
+  /** @param currentPath Path prefix inherited from ancestor directories. */
   generate(currentPath: string): Promise<VirtualFile[]>;
 }

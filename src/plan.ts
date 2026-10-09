@@ -29,64 +29,43 @@ async function runConcurrently<T>(
   }
 }
 
-/** A resolved file in the plan, with its absolute path and status. */
 export interface PlanFile {
   path: string;
   absolutePath: string;
   content: string | Uint8Array;
   status: "write" | "skip";
-  /** Symlink target. When set, the entry is created as a symbolic link. */
+  /** Symlink target. When set, the entry is a symbolic link. */
   symlink?: string;
-  /** File mode bits (e.g. `0o755`). Applied with chmod after writing. */
+  /** Mode bits, applied with chmod after writing. */
   mode?: number;
 }
 
-/** Progress event fired by {@link Plan.run} after each entry is processed. */
 export interface PlanProgress {
-  /** The entry that was just written or linked. */
   file: PlanFile;
-  /** Number of entries processed so far (1-based). */
   done: number;
-  /** Total number of entries `run()` will process (skipped entries excluded). */
+  /** Skipped entries excluded. */
   total: number;
 }
 
-/** A deferred write plan returned by {@link plan}. */
 export interface Plan {
   files: PlanFile[];
-  /**
-   * Execute the plan. Requires a {@link FileSystem} if one was not
-   * provided to {@link plan} via `PlanOptions.fs`.
-   */
+  /** Execute the plan. Requires a `FileSystem` when none was passed to {@link plan}. */
   run(fs?: FileSystem, onProgress?: (progress: PlanProgress) => void): Promise<void>;
 }
 
 /**
- * Strategy applied when several entries resolve to the same path.
- *
- * - `"last"` (default) keeps the last entry — deterministic, supports
- *   base-tree + overrides composition.
- * - `"first"` keeps the first entry and drops later ones.
- * - `"error"` throws listing every duplicated path.
+ * Duplicate-path strategy: `"last"` (default, supports base + overrides),
+ * `"first"`, or `"error"` which throws listing every duplicated path.
  */
 export type ConflictStrategy = "error" | "first" | "last";
 
-/** Options for {@link plan}. */
 export interface PlanOptions {
   /** Base output directory. Required unless `fs.cwd()` is provided. */
   targetDir?: string;
-  /**
-   * When `false` and a `FileSystem` is available at plan-time,
-   * existing files are silently skipped.
-   * @default true
-   */
+  /** When `false`, existing files are silently skipped. @default true */
   overwrite?: boolean;
-  /** A {@link FileSystem} implementation for I/O operations. */
   fs?: FileSystem;
-  /**
-   * How to resolve entries sharing the same path.
-   * @default "last"
-   */
+  /** @default "last" */
   onConflict?: ConflictStrategy;
 }
 
@@ -121,16 +100,7 @@ function resolveConflicts(entries: PlanFile[], strategy: ConflictStrategy): Plan
   return deduped;
 }
 
-/**
- * Create a deferred write plan.
- *
- * Provide a {@link FileSystem} via `options.fs` or pass one to
- * {@link Plan.run} when you're ready to write. At least a
- * `targetDir` or a filesystem with `cwd()` is required.
- *
- * @param files – Array of virtual files to write (typically from {@link emit}).
- * @param options – Plan options.
- */
+/** Deferred write plan. Needs a `targetDir` or a `FileSystem` with `cwd()`. */
 export async function plan(files: VirtualFile[], options: PlanOptions = {}): Promise<Plan> {
   const io = options.fs;
   const base = options.targetDir ?? io?.cwd();
@@ -162,6 +132,7 @@ export async function plan(files: VirtualFile[], options: PlanOptions = {}): Pro
   planFiles = resolveConflicts(planFiles, options.onConflict ?? "last");
 
   if (options.overwrite === false && io) {
+    // TODO: bound concurrency with runConcurrently for very large trees.
     await Promise.all(
       planFiles.map(async (f) => {
         if (await io.exists(f.absolutePath)) {
@@ -196,6 +167,7 @@ export async function plan(files: VirtualFile[], options: PlanOptions = {}): Pro
         throw new Error("Plan contains file modes but the FileSystem does not implement chmod().");
       }
 
+      // TODO: bound concurrency with runConcurrently for very large trees.
       await Promise.all(Array.from(dirs, (d) => activeFs.mkdir(d, { recursive: true })));
 
       const total = pending.length;
