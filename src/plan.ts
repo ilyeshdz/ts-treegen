@@ -41,6 +41,16 @@ export interface PlanFile {
   mode?: number;
 }
 
+/** Progress event fired by {@link Plan.run} after each entry is processed. */
+export interface PlanProgress {
+  /** The entry that was just written or linked. */
+  file: PlanFile;
+  /** Number of entries processed so far (1-based). */
+  done: number;
+  /** Total number of entries `run()` will process (skipped entries excluded). */
+  total: number;
+}
+
 /** A deferred write plan returned by {@link plan}. */
 export interface Plan {
   files: PlanFile[];
@@ -48,7 +58,7 @@ export interface Plan {
    * Execute the plan. Requires a {@link FileSystem} if one was not
    * provided to {@link plan} via `PlanOptions.fs`.
    */
-  run(fs?: FileSystem): Promise<void>;
+  run(fs?: FileSystem, onProgress?: (progress: PlanProgress) => void): Promise<void>;
 }
 
 /**
@@ -164,7 +174,7 @@ export async function plan(files: VirtualFile[], options: PlanOptions = {}): Pro
   return {
     files: planFiles,
 
-    async run(runFs?: FileSystem) {
+    async run(runFs?: FileSystem, onProgress?: (progress: PlanProgress) => void) {
       const activeFs = runFs ?? io;
       if (!activeFs) {
         throw new Error("No FileSystem provided. Pass `fs` to plan() or run().");
@@ -188,6 +198,13 @@ export async function plan(files: VirtualFile[], options: PlanOptions = {}): Pro
 
       await Promise.all(Array.from(dirs, (d) => activeFs.mkdir(d, { recursive: true })));
 
+      const total = pending.length;
+      let done = 0;
+      function track(f: PlanFile) {
+        done++;
+        onProgress?.({ file: f, done, total });
+      }
+
       const regular: PlanFile[] = [];
       const links: PlanFile[] = [];
       for (let i = 0; i < pending.length; i++) {
@@ -202,8 +219,10 @@ export async function plan(files: VirtualFile[], options: PlanOptions = {}): Pro
         regular,
         async (f) => {
           await activeFs.writeFile(f.absolutePath, f.content);
-          if (f.mode === undefined || !chmodFn) return;
-          await chmodFn(f.absolutePath, f.mode);
+          if (f.mode !== undefined && chmodFn) {
+            await chmodFn(f.absolutePath, f.mode);
+          }
+          track(f);
         },
         MAX_CONCURRENCY,
       );
@@ -214,6 +233,7 @@ export async function plan(files: VirtualFile[], options: PlanOptions = {}): Pro
         async (f) => {
           if (!symlinkFn || f.symlink === undefined) return;
           await symlinkFn(f.symlink, f.absolutePath);
+          track(f);
         },
         MAX_CONCURRENCY,
       );

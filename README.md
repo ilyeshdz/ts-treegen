@@ -102,6 +102,19 @@ handy for base-tree + overrides composition), `"first"`, or
 const p = await plan(files, { targetDir: "./output", onConflict: "error" });
 ```
 
+### Progress reporting
+
+Pass a callback as the second argument of `run()` to track progress
+(e.g. for CLI progress bars). It fires once per processed entry with
+the entry, a 1-based `done` counter and the `total` (skipped entries
+excluded).
+
+```ts
+await p.run(undefined, ({ file, done, total }) => {
+  console.log(`[${done}/${total}] ${file.path} (${file.status})`);
+});
+```
+
 ### Browser / Deno / Bun
 
 Pass a custom `FileSystem` to `plan()` via the core import. The interface has only four methods, making it trivial to implement for any environment.

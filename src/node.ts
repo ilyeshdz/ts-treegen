@@ -2,7 +2,7 @@ export { PLATE_SYMBOL } from "./protocol.js";
 export { file, dir, link } from "./primitives.js";
 export { emit } from "./engine.js";
 export type { PlateNode, VirtualFile, FileContent, FileOptions, FileSystem } from "./protocol.js";
-export type { Plan, PlanFile, PlanOptions, ConflictStrategy } from "./plan.js";
+export type { Plan, PlanFile, PlanOptions, PlanProgress, ConflictStrategy } from "./plan.js";
 
 import { plan as planCore } from "./plan.js";
 import type { VirtualFile, FileSystem } from "./protocol.js";
